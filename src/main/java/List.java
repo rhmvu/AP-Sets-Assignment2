@@ -1,5 +1,8 @@
 public class List<E extends Comparable> implements ListInterface<E>{
 
+    Node head,
+    tail;
+
     private class Node {
 
         E data;
@@ -20,6 +23,9 @@ public class List<E extends Comparable> implements ListInterface<E>{
 
     @Override
     public boolean isEmpty() {
+        if(head == null){
+            return true;
+        }
         return false;
     }
 
@@ -30,7 +36,17 @@ public class List<E extends Comparable> implements ListInterface<E>{
 
     @Override
     public int size() {
-        return 0;
+        if(isEmpty()){
+           return 0;
+        } else {
+            int size = 1;
+            Node k = head;
+            while (k.next != null) {
+                size += 1;
+                k = k.next;
+            }
+            return size;
+        }
     }
 
     @Override
