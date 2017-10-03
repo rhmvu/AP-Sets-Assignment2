@@ -68,8 +68,30 @@ public class List<E extends Comparable> implements ListInterface<E>{
             current = tail= head = new Node(d);
             
         } else {
-            Node newNode = new Node(d,tail,null);
-            current = tail = tail.next = newNode;
+            if (tail.data.compareTo(d)<=0) {
+                Node tailNode = new Node(d, tail, null);
+                current = tail = tail.next = tailNode;
+            } else {
+            if (head.data.compareTo(d)>=0) {
+                Node headNode = new Node(d, null, head);
+                current = head.next.prior = head = headNode;
+            } else {
+            	current = head;
+               while(current.data.compareTo(d) < 0){
+            	   if(current.next == null){
+            		   break;
+            	   }
+            	   current = current.next;
+               }
+               current =current.prior;
+               //Node middleNode = new Node(d,current,current.next);
+               //find(d);
+               Node middleNode =  new Node(d);
+               middleNode.prior = current;
+               middleNode.next = current.next;
+               current = middleNode.next.prior = middleNode.prior.next =middleNode;
+            }
+            }
         }
         numberOfElements+=1;
         return this;
@@ -129,10 +151,16 @@ public class List<E extends Comparable> implements ListInterface<E>{
             }
             current = current.next;
         }
-        if(head.data.compareTo(d) > 0){ //hopefully compareTo works...
-            current = head;
+        current = head;
+        if(head.data.compareTo(d) > 0){
         } else {
-            current = tail;
+            while (current.data.compareTo(d)< 0) {
+                if(current.next == null){
+                	return false;
+                }
+            	current = current.next;
+            }
+            current = current.prior;
         }
         return false;
     }
