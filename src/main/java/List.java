@@ -47,84 +47,27 @@ public class List<E extends Comparable> implements ListInterface<E>{
 
     @Override
     public int size() {
-        /*if(isEmpty()){
-            return 0;
-        } else {
-            int size = 1;
-            Node k = head;
-            while (k.next != null) {
-                size += 1;
-                k = k.next;
-            }
-
-        }
-        return size;*/
         return numberOfElements;
-    }
-    
-    public int sizeCalcNext() {
-    	int size;  
-    	if(isEmpty()){
-        return 0;
-    } else {
-        size = 1;
-        Node k = head;
-        while (k.next != null) {
-            size += 1;
-            k = k.next;
-        }
-
-    }
-    return size;
-    }
-    
-    public int sizeCalcPrev(){
-    	  int size;
-    	  if(isEmpty()){
-        return 0;
-    } else {
-        size = 1;
-        Node k = tail;
-        while (k.prior != null) {
-            size += 1;
-            k = k.prior;
-        }
-
-    }
-    return size;
     }
 
     @Override
     public ListInterface<E> insert(E d) {
         if (isEmpty()){
             current = tail= head = new Node(d);
-            
+
         } else {
             if (tail.data.compareTo(d)<=0) {
                 Node tailNode = new Node(d, tail, null);
                 current = tail = tail.next = tailNode;
             } else {
-            if (head.data.compareTo(d)>=0) {
-                Node headNode = new Node(d, null, head);
-                current = head = head.prior = headNode;
-            } else {
-            	current = head;
-               while(current.data.compareTo(d) < 0){
-            	   if(current.next == null){
-            		   break;
-            	   }
-            	   current = current.next;
-            	   //goToNext();
-               }
-              // current =current.prior;
-               goToPrevious();
-               //Node middleNode = new Node(d,current,current.next);
-               //find(d);
-               Node middleNode =  new Node(d);
-               middleNode.prior = current;
-               middleNode.next = current.next;
-               current = middleNode.next.prior = middleNode.prior.next =middleNode;
-            }
+                if (head.data.compareTo(d)>=0) {
+                    Node headNode = new Node(d, null, head);
+                    current = head = head.prior = headNode;
+                } else {
+                    find(d);
+                    Node middleNode =  new Node(d,current,current.next);
+                    current = middleNode.next.prior = middleNode.prior.next =middleNode;
+                }
             }
         }
         numberOfElements+=1;
@@ -138,38 +81,25 @@ public class List<E extends Comparable> implements ListInterface<E>{
 
     @Override
     public ListInterface<E> remove() {
-        /** @precondition  - The list is not empty.
-         * 	@postcondition - The current element of list-PRE is not present in list-POST.
-         * 	    			current-POST points to
-         *    					- if list-POST is empty
-         *   						null
-         *   					- if list-POST is not empty
-         *     						if current-PRE was the last element of list-PRE
-         *     							the last element of list-POST
-         *     						else
-         *     							the element after current-PRE
-         *  				list-POST has been returned.
-         **/
-    	if(numberOfElements == 1){
-        	init();
-        	return null;
+        if(numberOfElements == 1){
+            init();
+            return null;
         }
-    	if (current.next == null && current.prior != null){
+        if (current.next == null && current.prior != null){
             current = current.prior;
             current.next= current.next.prior = null;
         } else {
-        	if(current.prior !=null){
-        		current.prior.next = current.next;
-        		current.next.prior = current.prior;
-        	}
-            
+            if(current.prior !=null){
+                current.prior.next = current.next;
+                current.next.prior = current.prior;
+            }
+
             Node temp = current;
             current = temp.next;
             temp.next = temp.prior = null;
         }
-    	
+
         numberOfElements-=1;
-        
         return this;
     }
 
@@ -190,9 +120,9 @@ public class List<E extends Comparable> implements ListInterface<E>{
         } else {
             while (current.data.compareTo(d)< 0) {
                 if(current.next == null){
-                	return false;
+                    return false;
                 }
-            	current = current.next;
+                current = current.next;
             }
             current = current.prior;
         }
@@ -246,12 +176,17 @@ public class List<E extends Comparable> implements ListInterface<E>{
         temp.head = this.head;
         temp.tail = this.tail;
 
-        goToFirst();
-        while (current.next != null){
+        goToLast();
+        while (current.prior != null){
             temp.insert(retrieve());
+            this.current = current.prior;
         }
         current = temp.current;
         return temp;
+    }
+    
+    void deleteDataInCurrent(){ //used for CopyTest
+    	current.data = null;
     }
 }
 

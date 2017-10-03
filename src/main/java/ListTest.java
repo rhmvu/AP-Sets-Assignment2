@@ -73,8 +73,9 @@ public class ListTest {
         // TODO: You can add more of your own tests.
     }
     
-    @Test
+   /* @Test
     public void testSize2(){
+    	//BUILT BY RUBEN, EXPECT THESE TO FAIL BECAUSE THE METHODS ARE NOT PRESENT ANYMORE
     	List<Letter> list = new List<>();
     	for (int i = 0; i < 200; i++) {
             list.insert(new Letter('b'));
@@ -92,7 +93,48 @@ public class ListTest {
         assertEquals("Checking different methods next", 220, list.sizeCalcNext());
         assertEquals("Checking different methods prev" , 220, list.sizeCalcPrev());
         
+    }*/
+   @Test
+    public void testCloneSimple(){
+        //BUILT BY RUBEN
+        ListInterface<Letter> list = new List<>();
+        Letter b = new Letter('b');
+        for (int i = 0; i < 20; i++) {
+            list.insert(b);
+        }
+        
+        list.goToLast();
+        ListInterface<Letter> list2 = list.copy();
+        for (int i = 0; i < 20; i++) {
+            list.remove();
+        }
+        assertEquals("Original list should be empty", true, list.isEmpty());
+        assertEquals("Cloned list shouldn't be empty", false, list2.isEmpty());
+        assertEquals("retrieve in second list should deliver letter b", b, list2.retrieve());
+
     }
+   
+   @Test
+   public void testCloneHard(){
+       //BUILT BY RUBEN
+       List<Letter> list = new List<>();
+       Letter b = new Letter('b');
+       for (int i = 0; i < 20; i++) {
+           list.insert(b);
+       }
+       
+       list.goToLast();
+       ListInterface<Letter> list2 = list.copy();
+       for (int i = 0; i < 20; i++) {
+    	   list.deleteDataInCurrent();
+           list.remove();
+       }
+       assertEquals("Original list should be empty", true, list.isEmpty());
+       assertEquals("Cloned list shouldn't be empty", false, list2.isEmpty());
+       assertEquals("retrieve in second list should deliver Letter b, create new data element instead of referring to it from 2 different nodes!", b, list2.retrieve());
+
+   }
+    
 
     @Test
     public void testInsert() {
