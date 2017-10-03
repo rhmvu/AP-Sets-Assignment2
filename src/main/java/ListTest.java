@@ -63,11 +63,35 @@ public class ListTest {
         list.remove();
         assertEquals("Removing one item should decrement the size", 200, list.size());
 
+        
+        
+        
         // Init should empty the list.
         list.init();
         assertEquals("Init should set size to zero", 0, list.size());
 
         // TODO: You can add more of your own tests.
+    }
+    
+    @Test
+    public void testSize2(){
+    	List<Letter> list = new List<>();
+    	for (int i = 0; i < 200; i++) {
+            list.insert(new Letter('b'));
+        }
+        assertEquals("Adding many elements should result in a long list", 200, list.size());
+    	 //extra test:
+        assertEquals("Checking different methods next", 200, list.sizeCalcNext());
+        assertEquals("Checking different methods prev" , 200, list.sizeCalcPrev());
+        
+        for (int i = 0; i < 20; i++) {
+            list.insert(new Letter('a'));
+        }
+        assertEquals("Adding many elements should result in a long list", 220, list.size());
+    	 //extra test:
+        assertEquals("Checking different methods next", 220, list.sizeCalcNext());
+        assertEquals("Checking different methods prev" , 220, list.sizeCalcPrev());
+        
     }
 
     @Test

@@ -61,6 +61,38 @@ public class List<E extends Comparable> implements ListInterface<E>{
         return size;*/
         return numberOfElements;
     }
+    
+    public int sizeCalcNext() {
+    	int size;  
+    	if(isEmpty()){
+        return 0;
+    } else {
+        size = 1;
+        Node k = head;
+        while (k.next != null) {
+            size += 1;
+            k = k.next;
+        }
+
+    }
+    return size;
+    }
+    
+    public int sizeCalcPrev(){
+    	  int size;
+    	  if(isEmpty()){
+        return 0;
+    } else {
+        size = 1;
+        Node k = tail;
+        while (k.prior != null) {
+            size += 1;
+            k = k.prior;
+        }
+
+    }
+    return size;
+    }
 
     @Override
     public ListInterface<E> insert(E d) {
@@ -74,7 +106,7 @@ public class List<E extends Comparable> implements ListInterface<E>{
             } else {
             if (head.data.compareTo(d)>=0) {
                 Node headNode = new Node(d, null, head);
-                current = head.next.prior = head = headNode;
+                current = head = head.prior = headNode;
             } else {
             	current = head;
                while(current.data.compareTo(d) < 0){
@@ -82,8 +114,10 @@ public class List<E extends Comparable> implements ListInterface<E>{
             		   break;
             	   }
             	   current = current.next;
+            	   //goToNext();
                }
-               current =current.prior;
+              // current =current.prior;
+               goToPrevious();
                //Node middleNode = new Node(d,current,current.next);
                //find(d);
                Node middleNode =  new Node(d);
