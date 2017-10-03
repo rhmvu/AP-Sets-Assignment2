@@ -1,5 +1,15 @@
 public class List<E extends Comparable> implements ListInterface<E>{
 
+    int numberOfElements;
+    Node head,
+            current,
+            tail;
+
+
+    List(){
+        numberOfElements = 0;
+    }
+
     private class Node {
 
         E data;
@@ -20,62 +30,163 @@ public class List<E extends Comparable> implements ListInterface<E>{
 
     @Override
     public boolean isEmpty() {
+        if(head == null){
+            return true;
+        }
         return false;
     }
 
     @Override
     public ListInterface<E> init() {
-        return null;
+        head = null;
+        tail = null;
+        current = null;
+        numberOfElements = 0;
+        return this;
     }
 
     @Override
     public int size() {
-        return 0;
+        return numberOfElements;
     }
 
     @Override
     public ListInterface<E> insert(E d) {
-        return null;
+        if (isEmpty()){
+            current = tail= head = new Node(d);
+
+        } else {
+            if (tail.data.compareTo(d)<=0) {
+                Node tailNode = new Node(d, tail, null);
+                current = tail = tail.next = tailNode;
+            } else {
+                if (head.data.compareTo(d)>=0) {
+                    Node headNode = new Node(d, null, head);
+                    current = head = head.prior = headNode;
+                } else {
+                    find(d);
+                    Node middleNode =  new Node(d,current,current.next);
+                    current = middleNode.next.prior = middleNode.prior.next =middleNode;
+                }
+            }
+        }
+        numberOfElements+=1;
+        return this;
     }
 
     @Override
     public E retrieve() {
-        return null;
+        return current.data;
     }
 
     @Override
     public ListInterface<E> remove() {
-        return null;
+        if(numberOfElements == 1){
+            init();
+            return null;
+        }
+        if (current.next == null && current.prior != null){
+            current = current.prior;
+            current.next= current.next.prior = null;
+        } else {
+            if(current.prior !=null){
+                current.prior.next = current.next;
+                current.next.prior = current.prior;
+            }
+
+            Node temp = current;
+            current = temp.next;
+            temp.next = temp.prior = null;
+        }
+
+        numberOfElements-=1;
+        return this;
     }
 
     @Override
     public boolean find(E d) {
+        if(isEmpty()){
+            return false;
+        }
+        goToFirst();
+        while (current.next != null) {
+            if (current.data == d) {
+                return true;
+            }
+            current = current.next;
+        }
+        current = head;
+        if(head.data.compareTo(d) > 0){
+        } else {
+            while (current.data.compareTo(d)< 0) {
+                if(current.next == null){
+                    return false;
+                }
+                current = current.next;
+            }
+            current = current.prior;
+        }
         return false;
     }
 
     @Override
     public boolean goToFirst() {
-        return false;
+        if (isEmpty()) {
+            return false;
+        }else {
+            current = head;
+            return true;
+        }
     }
 
     @Override
     public boolean goToLast() {
-        return false;
+        if (isEmpty()) {
+            return false;
+        }else {
+            current = tail;
+            return true;
+        }
     }
 
     @Override
     public boolean goToNext() {
-        return false;
+        if (isEmpty() || current.next == null) {
+            return false;
+        }else {
+            current = current.next;
+            return true;
+        }
     }
 
     @Override
     public boolean goToPrevious() {
-        return false;
+        if (isEmpty() || current.prior == null) {
+            return false;
+        }else {
+            current = current.prior;
+            return true;
+        }
     }
 
     @Override
-    public ListInterface<E> copy() {
-        return null;
+    public ListInterface<E> copy() { //Doesn't create a deep copy yet?
+        List<E> temp = new List<E>();
+        temp.current = this.current;
+        temp.head = this.head;
+        temp.tail = this.tail;
+
+        goToLast();
+        while (current.prior != null){
+            temp.insert(retrieve());
+            this.current = current.prior;
+        }
+        current = temp.current;
+        return temp;
+    }
+    
+    void deleteDataInCurrent(){ //used for CopyTest
+    	current.data = null;
     }
 }
 
