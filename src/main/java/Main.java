@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 public class Main {
 
-    static final String SPACE_IDENTIFIER_EXCEPTION = "Space in Identifier not allowed";
+    static final String IDENTIFIER_FORMAT_EXCEPTION = "Space in Identifier not allowed";
 
     Scanner input;
     PrintStream out;
@@ -44,12 +44,12 @@ public class Main {
         if (statementScanner.hasNext()){
             String identifierName = statementScanner.next();
 
-            if(!identifierName.contains(" ")) {
+            if(hasCorrectIdentifierFormat(identifierName)) {
                 Identifier tempID = new Identifier(identifierName);
                 statementScanner.skip("=");
                 Set tempSet = parseInput(statementScanner.next());
             }else{
-                throw new APException(SPACE_IDENTIFIER_EXCEPTION);
+                throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
             }
         }
         //store new id/set combo in hashmap
@@ -76,6 +76,13 @@ public class Main {
     }
     private boolean nextCharIsParenthesis(String input) {
         return input.charAt(0) == '(';
+    }
+    private boolean hasCorrectIdentifierFormat(String input){
+        if (Character.isLetter(input.charAt(0)) && !input.contains(" ")){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void start() {
