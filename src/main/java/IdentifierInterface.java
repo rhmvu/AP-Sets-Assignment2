@@ -1,17 +1,37 @@
-/**	@elements : objects of type String
+/**	@elements : objects of char
  *	@structure : singular
- *	@domain : any String
+ *	@domain : characters
  *	@constructor - Identifier();
  *	<dl>
  *		<dt><b>PRE-conditie</b><dd>		-
- *		<dt><b>POST-conditie</b><dd> 	An identifier object has been created which can be returned as a String.
+ *		<dt><b>POST-conditie</b><dd> 	An identifier object has been created.
  * </dl>
  **/
 
-public interface IdentifierInterface<String> {
+public interface IdentifierInterface {
 
     /**	@precondition  -
-     *	@postcondition - The identifier is returned in Stringform.
+     *	@postcondition - The Identifier is returned as a String.
      **/
-    String getString();
+    public String toString();
+
+    /**	@precondition  -
+     *	@postcondition - returned the hashcode of the Identifier.
+     **/
+    public int hashCode();
+
+    /**	@precondition  -
+     *	@postcondition - The Identifier is compared to the object in the parameter.
+     *                      @success:   True is returned.
+     *                      @failure    False is returned.
+     **/
+    public boolean equals(Object toCompare);
+
+
+    /**	@precondition  -
+     *	@postcondition -
+     *                     @success:	The String in the input has been added to the Identifier.
+     *                     @failure:    The String in the input was not conform the ENBF Identifier format, input not added.
+     **/
+    public boolean appendValidIdentifier(String toAppend);
 }
