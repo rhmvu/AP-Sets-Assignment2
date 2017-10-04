@@ -8,8 +8,9 @@ import java.util.regex.Pattern;
 
 public class Main {
 
-    static final String IDENTIFIER_FORMAT_EXCEPTION = "Space in Identifier not allowed";
-    static final String IDENTIFIER_BLANK_EXCEPTION = "An Identifier has to have a name";
+    static final String IDENTIFIER_FORMAT_EXCEPTION = "Space in Identifier not allowed",
+                        IDENTIFIER_BLANK_EXCEPTION = "An Identifier has to have a name",
+                        INVALID_STATEMENT = "Invalid statement, please read the documentation";
 
     Scanner input;
     PrintStream out;
@@ -22,10 +23,27 @@ public class Main {
 
 
 
-    Set parseInput(Scanner input)throws APException {
+    void parseStatement(Scanner input)throws APException {
+        if (nextCharIs(input, '/')) {
+            return; //comment, so this is skipped
+        } else {
+            if (nextCharIsLetter(input)) {
+                parseAssignment(input);
+            } else {
+                if (nextCharIs(input, '?')) {
+                    parsePrint(input);
+                } else {
+                    throw new APException(INVALID_STATEMENT);
+
+                }
+            }
+        }
+    }
+
+    Set parseFactor(Scanner input) throws APException{
         Set result = null;
         if (nextCharIsLetter(input)){
-            parseIdentifier(input);
+            result = getSetByID(input);
         } else {
             if (nextCharIs(input,'{')){
                 result = parseSet(input);
@@ -38,7 +56,8 @@ public class Main {
         return result;
     }
 
-    void parseIdentifier(Scanner input) throws APException {
+
+    void parseAssignment(Scanner input) throws APException {
         input.useDelimiter("=");
         Scanner IdentifierScanner = new Scanner(input.next());
 
@@ -58,6 +77,11 @@ public class Main {
         //store new id/set combo in hashmap??
     }
 
+    void parsePrint(Scanner input) throws APException{
+        //print something??
+    }
+
+
     Set parseSet(Scanner input) throws APException{
         Scanner statementScanner = new Scanner(input.next());
         //parse statement
@@ -67,6 +91,10 @@ public class Main {
         Scanner statementScanner = new Scanner(input.next());
         //parse statement
     }
+    Set getSetByID(Scanner input) throws APException{
+
+    }
+
 
 
 
@@ -89,7 +117,8 @@ public class Main {
         input = new Scanner(System.in);
         while (input.hasNextLine()) {
             try {
-                parseInput(input);
+                //IDEA: delete all spaces in the line beforehand
+                parseStatement(input);
             }catch(APException exception){
                 out.println(exception);
             }
