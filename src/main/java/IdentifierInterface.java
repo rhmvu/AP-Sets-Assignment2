@@ -3,8 +3,8 @@
  *	@domain : any String
  *	@constructor - Identifier();
  *	<dl>
- *		<dt><b>PRE-conditie</b><dd>		-
- *		<dt><b>POST-conditie</b><dd> 	An identifier object has been created which can be returned as a String.
+ *		<dt><b>PRE-condition</b><dd>		-
+ *		<dt><b>POST-condition</b><dd> 	An identifier object has been created which can be returned as a String.
  * </dl>
  **/
 
