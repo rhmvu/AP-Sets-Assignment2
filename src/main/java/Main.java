@@ -14,11 +14,11 @@ public class Main {
 
     Scanner input;
     PrintStream out;
-    HashMap<Identifier, Set<BigInteger>> data; //Set to be created
+    HashMap<Identifier, Set<BigInteger>> variables; //Set to be created
 
     Main(){
         out = new PrintStream(System.out);
-        data = new HashMap<Identifier, Set<BigInteger>>();
+        variables = new HashMap<Identifier, Set<BigInteger>>();
     }
 
 
@@ -59,9 +59,16 @@ public class Main {
 
     void parseAssignment(Scanner input) throws APException {
         input.useDelimiter("=");
-        Scanner IdentifierScanner = new Scanner(input.next());
+        Scanner identifierScanner = new Scanner(input.next());
+        Identifier tempIdentifier = parseIdentifier(identifierScanner);
 
-        String identifierName = IdentifierScanner.next();
+        input.skip("=");
+        Set tempSet = parseFactor(input);
+        variables.put(tempIdentifier,tempSet);
+    }
+
+    Identifier parseIdentifier(Scanner input) throws APException{
+        String identifierName = input.next();
         if (identifierName.equals("")) {
             throw new APException(IDENTIFIER_BLANK_EXCEPTION);
         }
@@ -70,12 +77,9 @@ public class Main {
         if(!tempID.appendValidIdentifier(identifierName)) {
             throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
         }
-
-        input.skip("=");
-        Set tempSet = parseInput(input);
-
-        //store new id/set combo in hashmap??
+        return tempID;
     }
+
 
     void parsePrint(Scanner input) throws APException{
         //print something??
