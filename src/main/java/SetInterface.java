@@ -54,16 +54,16 @@ public interface SetInterface<E extends Comparable> {
     int size();
 
     /**	@precondition  - d must be Comparable.
-     *	@postcondition - FALSE: Element could not be added to the Set.
-     *  				TRUE:  Element added to the Set.
+     *	@postcondition - Element d has been added to the Set
+     *                   Set-POST has been returned.
      **/
-    boolean insert(E d);
+    SetInterface insert(E d);
 
-    /**	@precondition  - d must be in the Set.
-     *	@postcondition - FALSE: Element could not be removed from the Set, element was not in the Set.
-     *  				TRUE:  Element removed from the Set.
+    /**	@precondition  - Set must not be empty.
+     *	@postcondition - Element d has been removed from the Set
+     *                   Set-POST has been returned.
      **/
-    boolean remove(E d);
+    SetInterface remove(E d);
 
     /**	@precondition  -
      *	@postcondition - The Set is returned in Stringform.
