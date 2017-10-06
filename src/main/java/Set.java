@@ -5,7 +5,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     Set(){
         init();
     }
-    
+
     @Override
     public SetInterface init(){
         set = new List();
@@ -66,11 +66,14 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     @Override
     public String toString(){
         String result;
-        result = "<";
-        for (int i = 0;i<set.size() && set.goToFirst();i++){
-            result+= set.retrieve().toString(); //Only works if this works too...
+        result = "{";
+        if (set.goToFirst()){
+            result += set.retrieve().toString();
         }
-        return result+=">";
+        while (set.goToNext()){
+            result+= "," +set.retrieve().toString(); //Only works if this works too...
+        }
+        return result+="}";
     }
 
     @Override
