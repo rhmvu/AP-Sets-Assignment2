@@ -11,6 +11,7 @@ public class Main {
     static final String IDENTIFIER_FORMAT_EXCEPTION = "Space in Identifier not allowed",
                         IDENTIFIER_BLANK_EXCEPTION = "An Identifier has to have a name",
                         INVALID_STATEMENT = "Invalid statement, please read the documentation",
+                        IDENTIFIER_NOT_FOUND = ", parsed as identifier has no corresponding Set",
                         HELP_MESSAGE = "This Set interpreter works with operators +,-,* and Sets containing big Integers\n"
                                         + "Set Interpreter REQUIRES you to omit spaces in your commands.\n"
                                         +"However, you can use spaces and run the program with '--omit-spaces' to bypass this.\n\n"
@@ -102,7 +103,16 @@ public class Main {
         //parse statement
     }
     Set getSetByID(Scanner input) throws APException{
-
+        input.useDelimiter("[^A-Za-z0-9]");
+        Set result;
+        Scanner identifierScanner = new Scanner(input.next());
+        Identifier parsedIdentifier = parseIdentifier(identifierScanner);
+        if(variables.containsKey(parsedIdentifier)) {
+            result = variables.get(parsedIdentifier);
+        }else{
+            throw new APException(parsedIdentifier.toString()+IDENTIFIER_NOT_FOUND);
+        }
+        return result;
     }
 
 
