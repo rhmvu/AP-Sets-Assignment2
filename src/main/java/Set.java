@@ -1,6 +1,4 @@
 public class Set<E extends Comparable> implements SetInterface<E>{
-    static final String SET_OPEN = "{";
-    static final String SET_CLOSE = "}";
     private ListInterface set;
 
     Set(){
@@ -93,15 +91,14 @@ public class Set<E extends Comparable> implements SetInterface<E>{
 
     @Override
     public String toString(){
-        String result;
-        result = SET_OPEN;
+        String result = "";
         if (set.goToFirst()){
-            result += set.retrieve().toString();
+            result = set.retrieve().toString();
         }
         while (set.goToNext()){
-            result+= "," +set.retrieve().toString(); //Only works if this works too...
+            result+= " " +set.retrieve().toString(); //Only works if this works too...
         }
-        return result+=SET_CLOSE;
+        return result;
     }
 
     @Override

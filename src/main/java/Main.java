@@ -10,7 +10,13 @@ public class Main {
 
     static final String IDENTIFIER_FORMAT_EXCEPTION = "Space in Identifier not allowed",
                         IDENTIFIER_BLANK_EXCEPTION = "An Identifier has to have a name",
-                        INVALID_STATEMENT = "Invalid statement, please read the documentation";
+                        INVALID_STATEMENT = "Invalid statement, please read the documentation",
+                        HELP_MESSAGE = "This Set interpreter works with operators +,-,* and Sets containing big Integers\n"
+                                        + "Set Interpreter REQUIRES you to omit spaces in your commands.\n"
+                                        +"However, you can use spaces and run the program with '--omit-spaces' to bypass this.\n\n"
+                                        +"Allowed statements:\n?<Set/Factor> to output a set or factor\n"
+                                        +"<Identifier>=<Set/Factor> to assign a Set to an Identifier.\n\n"
+                                        + "Set Interpreter by Kostas Moumtzakis & Ruben van der Ham";
 
     Scanner input;
     PrintStream out;
@@ -82,7 +88,7 @@ public class Main {
 
 
     void parsePrint(Scanner input) throws APException{
-        //print something??
+        input.//print something??
     }
 
 
@@ -117,12 +123,18 @@ public class Main {
     }
 
 
-    private void start() {
+    private void start(boolean omitSpaces) {
         input = new Scanner(System.in);
         while (input.hasNextLine()) {
             try {
-                //IDEA: delete all spaces in the line beforehand
-                parseStatement(input);
+                if(omitSpaces) {
+                    String statement = input.nextLine();
+                    statement = statement.replace(" ", "");
+                    Scanner spaceLess = new Scanner(statement);
+                    parseStatement(spaceLess);
+                }else {
+                    parseStatement(input);
+                }
             }catch(APException exception){
                 out.println(exception);
             }
@@ -130,6 +142,14 @@ public class Main {
     }
 
     public static void main(String[] argv) {
-        new Main().start();
+        try{
+            if(argv[0].equals("--omit-spaces")){
+                new Main().start(true);
+            }
+            if (argv[0].equals("--help")){
+                System.out.println(HELP_MESSAGE);
+            }
+        }catch (NullPointerException e){};
+        new Main().start(false);
     }
 }
