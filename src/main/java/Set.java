@@ -1,6 +1,7 @@
 public class Set<E extends Comparable> implements SetInterface<E>{
-
-    ListInterface set;
+    static final String SET_OPEN = "{";
+    static final String SET_CLOSE = "}";
+    private ListInterface set;
 
     Set(){
         init();
@@ -14,24 +15,44 @@ public class Set<E extends Comparable> implements SetInterface<E>{
 
     @Override
     public SetInterface union(SetInterface toUnion){
-        Set result = new Set();
+        SetInterface result = toUnion.copy();
+        this.set.goToFirst();
+        do{
+            if(!result.contains(this.set.retrieve())){
+               result.insert(this.set.retrieve());
+            }
+        }while(this.set.goToNext());
         return result;
     }
 
     @Override
     public SetInterface intersection(SetInterface toIntersect){
-        Set result = new Set();
+        SetInterface result = new Set();
+        this.set.goToFirst();
+        do{
+            if(toIntersect.contains(this.set.retrieve())){
+                result.insert(this.set.retrieve());
+            }
+        }while(this.set.goToNext());
         return result;
     }
     @Override
     public SetInterface complement(SetInterface toComplement){
-        Set result = new Set();
+        SetInterface result = this.copy();
+        this.set.goToFirst();
+        do{
+
+            if(toComplement.contains(this.set.retrieve())){
+                result.remove(this.set.retrieve());
+            }
+        }while(this.set.goToNext());
         return result;
     }
     @Override
     public SetInterface symDifference(SetInterface toSymDiffer){
-        Set result = new Set();
-        return result;
+        SetInterface union = this.union(toSymDiffer);
+        SetInterface intersect = this.intersection(toSymDiffer);
+        return union.complement(intersect);
     }
 
     @Override
@@ -64,16 +85,23 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     }
 
     @Override
+    public SetInterface copy(){
+        Set clone = new Set();
+        clone.set = this.set.copy();
+        return clone;
+    }
+
+    @Override
     public String toString(){
         String result;
-        result = "{";
+        result = SET_OPEN;
         if (set.goToFirst()){
             result += set.retrieve().toString();
         }
         while (set.goToNext()){
             result+= "," +set.retrieve().toString(); //Only works if this works too...
         }
-        return result+="}";
+        return result+=SET_CLOSE;
     }
 
     @Override
