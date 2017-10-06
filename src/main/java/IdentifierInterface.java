@@ -4,7 +4,7 @@
  *	@constructor - Identifier();
  *	<dl>
  *		<dt><b>PRE-condition</b><dd>		-
- *		<dt><b>POST-condition</b><dd> 	An identifier object has been created.
+ *		<dt><b>POST-condition</b><dd> 	- An identifier object has been created.
  * </dl>
  **/
 
