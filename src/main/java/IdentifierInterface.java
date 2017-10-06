@@ -3,8 +3,8 @@
  *	@domain : characters
  *	@constructor - Identifier();
  *	<dl>
- *		<dt><b>PRE-conditie</b><dd>		-
- *		<dt><b>POST-conditie</b><dd> 	An identifier object has been created.
+ *		<dt><b>PRE-condition</b><dd>		-
+ *		<dt><b>POST-condition</b><dd> 	An identifier object has been created.
  * </dl>
  **/
 
