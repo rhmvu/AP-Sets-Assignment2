@@ -65,6 +65,12 @@ public interface SetInterface<E extends Comparable> {
      **/
     SetInterface remove(E d);
 
+    /**
+     * @precondition -
+     * @postcondition A deep copy of the Set has been returned.
+     */
+    SetInterface copy();
+
     /**	@precondition  -
      *	@postcondition - The Set is returned in Stringform.
      **/
