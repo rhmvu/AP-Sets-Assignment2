@@ -1,22 +1,22 @@
-public class StringStack {
+public class OperatorStack {
     static final int STACK_SIZE = 100;
 
     int stackPointer;
-    String[] elements;
+    Operator[] elements;
 
-    StringStack(){
-        elements = new String[STACK_SIZE];
+    OperatorStack(){
+        elements = new Operator[STACK_SIZE];
         stackPointer = -1;
     }
 
-    void push(String value){
+    void push(Operator value){
         stackPointer+=1;
         elements[stackPointer]= value;
 
     }
 
-    String pop(){
-        String pop = elements[stackPointer];
+    Operator pop(){
+        Operator pop = elements[stackPointer];
         stackPointer-=1;
         return pop;
     }
@@ -26,7 +26,7 @@ public class StringStack {
         return;
     }
 
-    String peek(){
+    Operator peek(){
         return elements[stackPointer];
     }
 

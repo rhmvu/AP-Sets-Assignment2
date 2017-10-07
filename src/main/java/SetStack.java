@@ -2,21 +2,21 @@ public class SetStack {
     static final int STACK_SIZE = 100;
 
     int stackPointer;
-    Set[] elements;
+    SetInterface[] elements;
 
     SetStack(){
         elements = new Set[STACK_SIZE];
         stackPointer = -1;
     }
 
-    void push(Set value){
+    void push(SetInterface value){
         stackPointer+=1;
         elements[stackPointer]= value;
 
     }
 
-    Set pop(){
-        Set pop = elements[stackPointer];
+    SetInterface pop(){
+        SetInterface pop = elements[stackPointer];
         stackPointer-=1;
         return pop;
     }
@@ -26,7 +26,7 @@ public class SetStack {
         return;
     }
 
-    Set peek(){
+    SetInterface peek(){
         return elements[stackPointer];
     }
 
