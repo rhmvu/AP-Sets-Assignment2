@@ -1,3 +1,4 @@
+import javax.sound.midi.SysexMessage;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -28,8 +29,11 @@ public class Main {
 
 
     void parseStatement(Scanner input)throws APException {
+        //System.out.println("input was:"+input.nextLine());
+        //input.reset();
         skipSpaces();
         if (nextCharIs(input, '/')) {
+            System.out.println("Comment found");
             return; //comment, so this is skipped
         } else {
             if (nextCharIsLetter(input)) {
@@ -184,8 +188,9 @@ public class Main {
         }
     void parsePrint(Scanner input) throws APException{
         input.skip("\\?");//skip ?,\\to escape.
-        SetInterface toPrint = parseExpression(input);
-        out.println(toPrint.toString());
+        //SetInterface toPrint = parseExpression(input);
+        //out.println(toPrint.toString());
+        System.out.println("PRINT OUTPUT:"+input.nextLine());
     }
 
 
@@ -256,6 +261,7 @@ public class Main {
                     parseStatement(spaceLess);
                 }else {
                     parseStatement(input);
+                    System.out.println("NEWLINEEEEEEE!!!");
                 }
             }catch(APException exception){
                 out.println(exception);
@@ -268,7 +274,7 @@ public class Main {
             if (argv[0].equals("--help")){
                 System.out.println(HELP_MESSAGE);
             }
-        }catch (NullPointerException e){};
+        }catch (Exception e){};
         new Main().start();
     }
 }
