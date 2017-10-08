@@ -71,6 +71,16 @@ public interface SetInterface<E extends Comparable> {
      */
     SetInterface copy();
 
+    /**	@precondition -
+     *  @postcondition - FALSE: current Set does NOT contain 2 elements with the same value;
+     *  				TRUE:  current Set does contain 2 elements with the same value;
+     **/
+    boolean hasDoubleOccurencies();
+
+    /**	@precondition -
+     *  @postcondition - set-POST contains unique elements.
+     **/
+    SetInterface fixDoubleOccurencies();
     /**	@precondition  -
      *	@postcondition - The Set is returned in Stringform.
      **/

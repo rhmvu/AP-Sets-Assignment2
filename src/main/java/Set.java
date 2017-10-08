@@ -98,6 +98,39 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     }
 
     @Override
+    public boolean hasDoubleOccurencies(){
+        set.goToFirst();
+        if(isEmpty()){
+            return false;
+        }
+        do{
+            Comparable value = set.retrieve();
+            set.remove();
+            if(set.find(value)){
+                set.insert(value);
+                return true;
+            }
+            set.insert(value);
+        }while(this.set.goToNext());
+        return false;
+    }
+    @Override
+    public SetInterface fixDoubleOccurencies(){
+        set.goToFirst();
+        if(isEmpty()){
+            return this;
+        }
+        do{
+            Comparable value = set.retrieve();
+            remove((E) value);
+            if(!set.find(value)){
+                set.insert(value);
+            }
+        }while(this.set.goToNext());
+        return this;
+    }
+
+    @Override
     public String toString(){
         String result = "";
         if (set.goToFirst()){
