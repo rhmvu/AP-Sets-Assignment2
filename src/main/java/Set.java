@@ -13,16 +13,16 @@ public class Set<E extends Comparable> implements SetInterface<E>{
 
     @Override
     public SetInterface union(SetInterface toUnion){
-        System.out.printf("\nto union STARTED\n");
         SetInterface result = toUnion.copy();
-        System.out.printf("result = %s\n",result.toString());
         this.set.goToFirst();
         do{
             System.out.printf("result = %s\n",result.toString());
             if(!result.contains(this.set.retrieve())){
-               result.insert(this.set.retrieve());
+                System.out.printf("inserting:%d",this.set.retrieve());
+                result.insert(this.set.retrieve());
             }
         }while(this.set.goToNext());
+
         return result;
     }
 
@@ -42,8 +42,11 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         SetInterface result = this.copy();
         this.set.goToFirst();
         do{
+            System.out.printf("result = %s\n",result.toString());
+            System.out.printf("set2= %s\n",toComplement.toString());
 
-            if(!toComplement.contains(this.set.retrieve())){
+            if(toComplement.contains(this.set.retrieve())){
+                System.out.printf("contains = %d\n",this.set.retrieve());
                 result.remove(this.set.retrieve());
             }
         }while(this.set.goToNext());
