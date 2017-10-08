@@ -13,9 +13,12 @@ public class Set<E extends Comparable> implements SetInterface<E>{
 
     @Override
     public SetInterface union(SetInterface toUnion){
+        System.out.printf("\nto union STARTED\n");
         SetInterface result = toUnion.copy();
+        System.out.printf("result = %s\n",result.toString());
         this.set.goToFirst();
         do{
+            System.out.printf("result = %s\n",result.toString());
             if(!result.contains(this.set.retrieve())){
                result.insert(this.set.retrieve());
             }
@@ -40,7 +43,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         this.set.goToFirst();
         do{
 
-            if(toComplement.contains(this.set.retrieve())){
+            if(!toComplement.contains(this.set.retrieve())){
                 result.remove(this.set.retrieve());
             }
         }while(this.set.goToNext());
@@ -91,7 +94,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
 
     @Override
     public String toString(){
-        String result = "";
+        String result = "Empty Set";
         if (set.goToFirst()){
             result = set.retrieve().toString();
         }
