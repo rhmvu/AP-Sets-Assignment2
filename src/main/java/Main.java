@@ -127,8 +127,8 @@ public class Main {
         while(rpnScanner.hasNext()){
             token = rpnScanner.next();
             if(isOperator(token)){
-                set1 = rpnStack.pop();
                 set2 = rpnStack.pop();
+                set1 = rpnStack.pop();
                 System.out.printf("Operator: %s found\n",token);
                 if (token.charAt(0) == '*'){
                     SetInterface intersect = set1.intersection(set2);

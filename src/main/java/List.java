@@ -109,12 +109,11 @@ public class List<E extends Comparable> implements ListInterface<E>{
             return false;
         }
         goToFirst();
-        while (current.next != null) {
-            if (current.data == d) {
+        do{
+            if (current.data.hashCode() == d.hashCode() || current.data == d) {
                 return true;
             }
-            current = current.next;
-        }
+        }while(goToNext());
         current = head;
         if(head.data.compareTo(d) > 0){
         } else {
