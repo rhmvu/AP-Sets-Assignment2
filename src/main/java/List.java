@@ -81,27 +81,32 @@ public class List<E extends Comparable> implements ListInterface<E>{
 
     @Override
     public ListInterface<E> remove() {
-        if(numberOfElements == 1){
+        if (numberOfElements == 1) {
             init();
-            return null;
+            return this;
         }
-        if (current.next == null && current.prior != null){
+        if (current.next == null && current.prior != null) { // current == tail
             current = current.prior;
-            current.next= current.next.prior = null;
+            current.next = current.next.prior = null;
+            tail = current;
         } else {
-            if(current.prior !=null){
-                current.prior.next = current.next;
-                current.next.prior = current.prior;
+            if (current.prior == null) { // current == head
+                current = current.next;
+                current.prior = current.prior.next = null;
+                head = current;
+            } else {
+                if (current.prior != null && current.next != null) { //current is in the middle of 2 nodes
+                    Node temp = current.next;
+                    current.prior.next = current.next;
+                    current.next.prior = current.prior;
+                    current = temp;
+                }
             }
-
-            Node temp = current;
-            current = temp.next;
-            temp.next = temp.prior = null;
         }
-
-        numberOfElements-=1;
+        numberOfElements -= 1;
         return this;
     }
+
 
     @Override
     public boolean find(E d) {
