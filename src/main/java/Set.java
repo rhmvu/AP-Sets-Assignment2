@@ -84,6 +84,8 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     public SetInterface remove(E d){
         if(set.find(d)) {
             set.remove();
+            System.out.printf("Set removed\n");
+            System.out.printf("Set Size = %d",this.size());
         }
         return this;
     }
@@ -97,7 +99,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
 
     @Override
     public String toString(){
-        String result = "Empty Set";
+        String result = "";
         if (set.goToFirst()){
             result = set.retrieve().toString();
         }
