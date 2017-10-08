@@ -31,9 +31,10 @@ public class Main {
     void parseStatement(Scanner input)throws APException {
         //System.out.println("input was:"+input.nextLine());
         //input.reset();
-        skipSpaces();
+        //skipSpaces(input);
         if (nextCharIs(input, '/')) {
             System.out.println("Comment found");
+            System.out.println(input.nextLine());
             return; //comment, so this is skipped
         } else {
             if (nextCharIsLetter(input)) {
@@ -49,7 +50,7 @@ public class Main {
     }
 
     SetInterface parseFactor(Scanner input) throws APException{
-        skipSpaces();
+        skipSpaces(input);
         SetInterface result = null;
         if (nextCharIsLetter(input)){
             result = getSetByID(input);
@@ -62,6 +63,8 @@ public class Main {
                 if (nextCharIsOpenParenthesis(input)) {
                     result = parseComplexFactor(input);
                     input.skip("\\)");
+                }else{
+                    throw new APException("Expression/Factor has wrong format");
                 }
 
             }}
@@ -70,19 +73,28 @@ public class Main {
 
 
     void parseAssignment(Scanner input) throws APException {
-        input.useDelimiter("\\s \\s|\\s=\\s"); //delimit on " " OR "="
+        input.useDelimiter(" |="); //delimit on " " OR "="
         Scanner identifierScanner = new Scanner(input.next());
         Identifier tempIdentifier = parseIdentifier(identifierScanner);
-        skipSpaces();
-        if(nextCharIsLetter(input)){    //If next char is letter it would mean there is a space in the identifier and only the first part is parsed.
+        input = skipSpaces(input);
+        if(nextCharIsLetter(input) ||nextCharIs(input,' ')){    //If next char is letter it would mean there is a space in the identifier and only the first part is parsed.
+            System.out.println("NextChar is letter");
             throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
         }
-        input.skip("=");
+        if(nextCharIs(input,'=')){
+            input.skip("=");
+        }else{
+            throw new APException("'=' missing, Assignment has not the correct format");
+        }
+        System.out.println("Before set in assignment");
         SetInterface tempSet = parseExpression(input);
+        System.out.println("AFTER set in assignment");
+        System.out.printf("This is the set:%s\n",tempSet.toString());
         variables.put(tempIdentifier,tempSet);
     }
 
     Identifier parseIdentifier(Scanner input) throws APException{
+        //input.useDelimiter("=");
         String identifierName = input.next();
         if (identifierName.equals("")) {
             throw new APException(IDENTIFIER_BLANK_EXCEPTION);
@@ -90,6 +102,8 @@ public class Main {
 
         Identifier tempID = new Identifier();
         if(!tempID.appendValidIdentifier(identifierName)) {
+            System.out.println("appendValid was WRONG");
+            System.out.println(identifierName);
             throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
         }
         return tempID;
@@ -98,10 +112,14 @@ public class Main {
     SetInterface parseExpression(Scanner input)throws APException{ //TODO add APEXCEPTION
         SetInterface result;
         String expression = input.nextLine();
+        System.out.printf("\nExpression:%S\n",expression);
         //expression = expression.replace(" ","");
-        Scanner rpnScanner = new Scanner(shuntingYard(expression));
+        String rpnString = shuntingYard(expression);
+        System.out.printf("\nSHUNYARD output:%S\n",rpnString);
+        Scanner rpnScanner = new Scanner(rpnString);
+        System.out.println("ShunYard done");
         SetStack rpnStack = new SetStack();
-        rpnScanner.useDelimiter(",");
+        rpnScanner.useDelimiter("_");
         SetInterface set1,
                 set2;
         String token;
@@ -111,7 +129,7 @@ public class Main {
             if(isOperator(token)){
                 set1 = rpnStack.pop();
                 set2 = rpnStack.pop();
-
+                System.out.printf("Operator: %s found\n",token);
                 if (token.charAt(0) == '*'){
                     SetInterface intersect = set1.intersection(set2);
                     rpnStack.push(intersect);
@@ -132,10 +150,15 @@ public class Main {
                     }
                 }
             }else {
-                rpnStack.push(parseFactor(rpnScanner));
+                System.out.printf("factor: %s found\n",token);
+                SetInterface newSet = parseFactor(new Scanner(token));
+                //System.out.printf(newSet.toString());
+                rpnStack.push(newSet);
             }
+            rpnScanner.skip("_");
         }
         result = rpnStack.pop();
+        System.out.printf("\n\nRESULT:%s",result.toString());
         return result;
     }
 
@@ -144,18 +167,24 @@ public class Main {
             OperatorStack operatorStack = new OperatorStack();
             StringBuffer result = new StringBuffer();
             Scanner ShunScanner = new Scanner(inFix);
+            System.out.printf("\n\nSHUNYARD STARTED\n\n");
             while(ShunScanner.hasNext()){
-                if(nextCharIsLetter(ShunScanner)){
+                //System.out.printf("\n\nnew token present\n\n");
+                if(nextCharIsLetter(ShunScanner)|| nextCharIs(ShunScanner,'{')){
                     ShunScanner.useDelimiter("\\+|\\-|\\||\\*");
-                    result.append(ShunScanner.next());
-                    result.append(',');
+                    String token = ShunScanner.next();
+                    System.out.printf("factor: %s found\n",token);
+                    result.append(token);
+                    result.append('_');
                 }else{
                     if(nextCharIsOperand(ShunScanner)){
-                        ShunScanner.useDelimiter("[A-Za-z0-9]");
-                        Operator operator = new Operator(ShunScanner.next());
+                        ShunScanner.useDelimiter("[A-Za-z0-9]|\\{");
+                        String token = ShunScanner.next();
+                        System.out.printf("operand: %s found\n",token);
+                        Operator operator = new Operator(token);
                         while (operatorStack.size() > 0 && operator.getPrecedence() <= operatorStack.peek().getPrecedence()) {
                             result.append(operatorStack.pop().getValue());
-                            result.append(',');
+                            result.append('_');
                         }
                         operatorStack.push(operator);
                     } else{
@@ -167,6 +196,7 @@ public class Main {
                             if (nextCharIs(ShunScanner,')')){
                                 while(operatorStack.peek().getValue() != '('){
                                     result.append(operatorStack.pop().getValue());
+                                    result.append('_');
                                 }
                                 if(operatorStack.peek().getValue()== '('){
                                     operatorStack.pop();
@@ -179,18 +209,20 @@ public class Main {
                     }
                 }
             }
-            while(operatorStack.peek() != null){
+            while(operatorStack.size() != 0){
                 result.append(operatorStack.pop().getValue());
+                result.append('_');
             }
 
-            //output string: RPN notation delimited with ',' e.g "var1,<5,6,7,8,9>,+,var3,-"
+            //output string: RPN notation delimited with ',' e.g "var1_{5,6,7,8,9}_+_var3_-"
             return result.toString();
         }
     void parsePrint(Scanner input) throws APException{
         input.skip("\\?");//skip ?,\\to escape.
-        //SetInterface toPrint = parseExpression(input);
+        SetInterface toPrint = parseExpression(input);
+        System.out.printf("this set has been returned:%s\n",toPrint);
         //out.println(toPrint.toString());
-        System.out.println("PRINT OUTPUT:"+input.nextLine());
+        System.out.println("PRINT OUTPUT:"+toPrint.toString());
     }
 
 
@@ -202,7 +234,11 @@ public class Main {
             if(nextCharIs(input,',')) {
                 input.skip(",");
             }
-            newElement = input.nextBigInteger();
+            try {
+                newElement = input.nextBigInteger();
+            }catch(Exception e){
+                throw new APException("Couldn't parse inputted Set, end sets with a '}'");
+            }
             result.insert(newElement);
         }
         return result;
@@ -226,24 +262,29 @@ public class Main {
         return result;
     }
 
-    void skipSpaces(){
+    Scanner skipSpaces(Scanner input){
         while(nextCharIs(input,' ')){
             input.skip(" ");
         }
+        return input;
     }
 
 
     private boolean nextCharIsLetter(Scanner input){
+        input.useDelimiter("");
         return input.hasNext("[a-zA-Z]");
     }
     private boolean nextCharIsOperand(Scanner input) {
+        input.useDelimiter("");
         return input.hasNext("\\*") ||input.hasNext("\\+")||input.hasNext("\\-")||input.hasNext("\\|");
     }
     private boolean nextCharIsOpenParenthesis(Scanner input) {
+        input.useDelimiter("");
         return input.hasNext("[(]");
     }
 
     private boolean nextCharIs(Scanner input, char c){
+        input.useDelimiter("");
         return input.hasNext(Pattern.quote(c+""));
     }
     private boolean isOperator(String input){
@@ -251,8 +292,8 @@ public class Main {
     }
 
     private void start() {
-        input = new Scanner(System.in);
-        while (input.hasNextLine()) {
+        Scanner directInput = new Scanner(System.in);
+        while (directInput.hasNextLine()) {
             try {
                 if(false) {
                     String statement = input.nextLine();
@@ -260,8 +301,10 @@ public class Main {
                     Scanner spaceLess = new Scanner(statement);
                     parseStatement(spaceLess);
                 }else {
-                    parseStatement(input);
+                    input = new Scanner(directInput.nextLine().replace(" ",""));
                     System.out.println("NEWLINEEEEEEE!!!");
+                    parseStatement(input);
+
                 }
             }catch(APException exception){
                 out.println(exception);

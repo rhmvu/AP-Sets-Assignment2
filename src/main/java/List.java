@@ -171,23 +171,26 @@ public class List<E extends Comparable> implements ListInterface<E>{
 
     @Override
     public ListInterface<E> copy() { //Doesn't create a deep copy yet?
+        Node oldCurrent = current;
         List<E> temp = new List<E>();
-        temp.current = this.current;
-        temp.head = this.head;
-        temp.tail = this.tail;
-
-        goToLast();
-        while (current.prior != null){
-            temp.insert(retrieve());
-            this.current = current.prior;
+        if (this.isEmpty()){
+            return temp.init();
         }
-        current = temp.current;
+        this.goToLast();
+        temp.insert(this.retrieve());
+        temp.tail = temp.current;
+        while (current.prior != null){
+            this.current = current.prior;
+            temp.insert(this.retrieve());
+        }
+        temp.head = temp.current;
+        current = oldCurrent;
         return temp;
     }
     
-    void deleteDataInCurrent(){ //used for CopyTest
+    /*void deleteDataInCurrent(){ //used for CopyTest
     	current.data = null;
-    }
+    }*/
 }
 
 
