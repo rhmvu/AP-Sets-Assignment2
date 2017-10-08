@@ -1,4 +1,3 @@
-import javax.sound.midi.SysexMessage;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -10,6 +9,7 @@ public class Main {
             IDENTIFIER_BLANK_EXCEPTION = "An Identifier has to have a name",
             INVALID_STATEMENT = "Invalid statement, please read the documentation",
             IDENTIFIER_NOT_FOUND = ", parsed as identifier has no corresponding Set",
+            DOUBLE_VALUE_SET = "Invalid Set: Set contains 2 elements with the same value",
             HELP_MESSAGE = "This Set interpreter works with operators +,-,* and Sets containing big Integers\n"
                     + "Set Interpreter REQUIRES you to omit spaces in identifiers\n"
                     +"However, you can use spaces and run the program with '--omit-spaces' to bypass this.\n\n"
@@ -20,6 +20,8 @@ public class Main {
     Scanner input;
     PrintStream out;
     HashMap<Identifier, SetInterface<BigInteger>> variables;
+    boolean ignoreDoubleElementsInSet;
+    boolean fixDoubleElementsInSet;
 
     Main(){
         out = new PrintStream(System.out);
@@ -241,6 +243,7 @@ public class Main {
             }
             result.insert(newElement);
         }
+        checkForDoubles(result);
         return result;
     }
 
@@ -269,7 +272,15 @@ public class Main {
         return input;
     }
 
-
+    void checkForDoubles(SetInterface result)throws APException{
+        if(result.hasDoubleOccurencies() && !ignoreDoubleElementsInSet && !fixDoubleElementsInSet){
+            throw new APException(DOUBLE_VALUE_SET);
+        }else{
+            if(fixDoubleElementsInSet){
+                result.fixDoubleOccurencies();
+            }
+        }
+    }
     private boolean nextCharIsLetter(Scanner input){
         input.useDelimiter("");
         return input.hasNext("[a-zA-Z]");
@@ -291,7 +302,10 @@ public class Main {
         return input.equals("+")||input.equals("-")||input.equals("*")||input.equals("|");
     }
 
-    private void start() {
+    private void start(boolean ignore,boolean fix) {
+        this.ignoreDoubleElementsInSet = ignore;
+        this.fixDoubleElementsInSet = fix;
+
         Scanner directInput = new Scanner(System.in);
         while (directInput.hasNextLine()) {
             try {
@@ -316,8 +330,23 @@ public class Main {
         try{
             if (argv[0].equals("--help")){
                 System.out.println(HELP_MESSAGE);
+                System.exit(0);
+            }else {
+                if (argv[0].equals("--ignore-doubles")) {
+                    System.out.println("EXPERIMENTAL: 2 Elements in the same set with the same value, will be allowed");
+                    new Main().start(true, false);
+                } else {
+                    if (argv[0].equals("--fix-doubles")) {
+                        System.out.println("EXPERIMENTAL: 2 Elements in the same set with the same value, will be 1 unique element");
+                        new Main().start(false, true);
+                    } else {
+                        new Main().start(false, false);
+                    }
+                }
             }
-        }catch (Exception e){};
-        new Main().start();
+        }catch (Exception e){
+            new Main().start(false,false);
+        };
+
     }
 }
