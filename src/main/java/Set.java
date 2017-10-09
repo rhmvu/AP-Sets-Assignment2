@@ -137,7 +137,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
             result = set.retrieve().toString();
         }
         while (set.goToNext()){
-            result+= " " +set.retrieve().toString(); //Only works if this works too...
+            result += " " +set.retrieve().toString(); //Only works if this works too...
         }
         return result;
     }

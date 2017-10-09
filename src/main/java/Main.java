@@ -43,8 +43,8 @@ public class Main {
     private void parseAssignment(Scanner input) throws APException {
     	input.useDelimiter(" |=");
     	Identifier identifier = parseIdentifier(input.next());
-    	
     	input = input.skip("=");
+    	
     	if (nextCharIsLetter(input) || nextCharIs(input, ' ') || nextCharIs(input, '=')) {
             throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
         }
@@ -56,7 +56,6 @@ public class Main {
     private void parsePrintStatement(Scanner input) throws APException {
     	input.skip("\\?");//skip ?,\\to escape.
         SetInterface<BigInteger> set = parseExpression(input);
-        System.out.printf("this set has been returned:%s\n",set);
         System.out.println("Output: " + set.toString());
     }
     
@@ -69,6 +68,7 @@ public class Main {
             System.out.println(input);
             throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
         }
+    	
         return identifier;
     }
     
@@ -77,24 +77,88 @@ public class Main {
     	String expression = input.nextLine();
         System.out.println("Expression: " + expression);
         String rpnString = shuntingYard(expression);
+        System.out.printf("\nSHUNYARD output:%S\n",rpnString);
         
     	return result;
     	
     }
     
     private String shuntingYard(String inFix) throws APException {
-    	
-    	return null;
+    	OperatorStack operatorStack = new OperatorStack();
+        StringBuffer result = new StringBuffer();
+        Scanner ShunScanner = new Scanner(inFix);
+        System.out.printf("\n\nSHUNYARD STARTED\n\n");
+        while(ShunScanner.hasNext()){
+            //System.out.printf("\n\nnew token present\n\n");
+            if(nextCharIsLetter(ShunScanner)|| nextCharIs(ShunScanner,'{')){
+                ShunScanner.useDelimiter("\\+|\\-|\\||\\*");
+                String token = ShunScanner.next();
+                System.out.printf("factor: %s found\n",token);
+                result.append(token);
+                result.append('_');
+            }else{
+                if(nextCharIsOperand(ShunScanner)){
+                    ShunScanner.useDelimiter("[A-Za-z0-9]|\\{");
+                    String token = ShunScanner.next();
+                    System.out.printf("operand: %s found\n",token);
+                    Operator operator = new Operator(token);
+                    while (operatorStack.size() > 0 && operator.getPrecedence() <= operatorStack.peek().getPrecedence()) {
+                        result.append(operatorStack.pop().getValue());
+                        result.append('_');
+                    }
+                    operatorStack.push(operator);
+                } else{
+                    if(nextCharIs(ShunScanner,'(')){
+                        ShunScanner.useDelimiter("[A-Za-z0-9]");
+                        Operator operator = new Operator(ShunScanner.next());
+                        operatorStack.push(operator);
+                    }else{
+                        if (nextCharIs(ShunScanner,')')){
+                            while(operatorStack.peek().getValue() != '('){
+                                result.append(operatorStack.pop().getValue());
+                                result.append('_');
+                            }
+                            if(operatorStack.peek().getValue()== '('){
+                                operatorStack.pop();
+                            }else{
+                                throw new APException("ShuntingYard couldn't proccess your expression '(' missing");
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        while(operatorStack.size() != 0){
+            result.append(operatorStack.pop().getValue());
+            result.append('_');
+        }
+
+        //output string: RPN notation delimited with ',' e.g "var1_{5,6,7,8,9}_+_var3_-"
+        return result.toString();
+    }
+    private boolean nextCharIsLetter(Scanner input){
+        input.useDelimiter("");
+        return input.hasNext("[a-zA-Z]");
     }
     
+    private boolean nextCharIsOperand(Scanner input) {
+        input.useDelimiter("");
+        return input.hasNext("\\*") ||input.hasNext("\\+")||input.hasNext("\\-")||input.hasNext("\\|");
+    }
+    
+    private boolean nextCharIsOpenParenthesis(Scanner input) {
+        input.useDelimiter("");
+        return input.hasNext("[(]");
+    }
+
     private boolean nextCharIs(Scanner input, char c){
         input.useDelimiter("");
         return input.hasNext(Pattern.quote(c+""));
     }
     
-    private boolean nextCharIsLetter(Scanner input){
-        input.useDelimiter("");
-        return input.hasNext("[a-zA-Z]");
+    private boolean isOperator(String input){
+        return input.equals("+")||input.equals("-")||input.equals("*")||input.equals("|");
     }
 
     private void start() {
