@@ -1,19 +1,19 @@
 public class Set<E extends Comparable> implements SetInterface<E>{
-    private ListInterface set;
+    private ListInterface<E> set;
 
     Set(){
         init();
     }
 
     @Override
-    public SetInterface init(){
-        set = new List();
+    public SetInterface<E> init(){
+        set = new List<E>();
         return this;
     }
 
     @Override
-    public SetInterface union(SetInterface toUnion){
-        SetInterface result = toUnion.copy();
+    public SetInterface<E> union(SetInterface<E> toUnion){
+        SetInterface<E> result = toUnion.copy();
         this.set.goToFirst();
         do{
             System.out.printf("result = %s\n",result.toString());
@@ -27,8 +27,8 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     }
 
     @Override
-    public SetInterface intersection(SetInterface toIntersect){
-        SetInterface result = new Set();
+    public SetInterface<E> intersection(SetInterface<E> toIntersect){
+        SetInterface<E> result = new Set();
         this.set.goToFirst();
         do{
             if(toIntersect.contains(this.set.retrieve())){
@@ -38,8 +38,8 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         return result;
     }
     @Override
-    public SetInterface complement(SetInterface toComplement){
-        SetInterface result = this.copy();
+    public SetInterface<E> complement(SetInterface<E> toComplement){
+        SetInterface<E> result = this.copy();
         this.set.goToFirst();
         do{
             System.out.printf("result = %s\n",result.toString());
@@ -53,9 +53,9 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         return result;
     }
     @Override
-    public SetInterface symDifference(SetInterface toSymDiffer){
-        SetInterface union = this.union(toSymDiffer);
-        SetInterface intersect = this.intersection(toSymDiffer);
+    public SetInterface<E> symDifference(SetInterface<E> toSymDiffer){
+        SetInterface<E> union = this.union(toSymDiffer);
+        SetInterface<E> intersect = this.intersection(toSymDiffer);
         return union.complement(intersect);
     }
 
@@ -75,13 +75,13 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     }
 
     @Override
-    public SetInterface insert(E d){
+    public SetInterface<E> insert(E d){
         set.insert(d);
         return this;
     }
 
     @Override
-    public SetInterface remove(E d){
+    public SetInterface<E> remove(E d){
         if(set.find(d)) {
             set.remove();
             System.out.printf("Set removed\n");
@@ -91,8 +91,8 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     }
 
     @Override
-    public SetInterface copy(){
-        Set clone = new Set();
+    public SetInterface<E> copy(){
+        Set<E> clone = new Set<E>();
         clone.set = this.set.copy();
         return clone;
     }
@@ -104,7 +104,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
             return false;
         }
         do{
-            Comparable value = set.retrieve();
+            E value = set.retrieve();
             set.remove();
             if(set.find(value)){
                 set.insert(value);
@@ -115,13 +115,13 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         return false;
     }
     @Override
-    public SetInterface fixDoubleOccurencies(){
+    public SetInterface<E> fixDoubleOccurencies(){
         set.goToFirst();
         if(isEmpty()){
             return this;
         }
         do{
-            Comparable value = set.retrieve();
+            E value = set.retrieve();
             remove((E) value);
             if(!set.find(value)){
                 set.insert(value);
