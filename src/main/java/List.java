@@ -53,23 +53,22 @@ public class List<E extends Comparable> implements ListInterface<E>{
     @Override
     public ListInterface<E> insert(E d) {
         if (isEmpty()){
-            current = tail= head = new Node(d);
+            current = tail = head = new Node(d);
 
         } else {
             if (tail.data.compareTo(d)<=0) {
                 Node tailNode = new Node(d, tail, null);
                 current = tail = tail.next = tailNode;
+            } else if (head.data.compareTo(d)>=0) {
+                Node headNode = new Node(d, null, head);
+                current = head = head.prior = headNode;
             } else {
-                if (head.data.compareTo(d)>=0) {
-                    Node headNode = new Node(d, null, head);
-                    current = head = head.prior = headNode;
-                } else {
-                    find(d);
-                    Node middleNode =  new Node(d,current,current.next);
-                    current = middleNode.next.prior = middleNode.prior.next =middleNode;
-                }
+                find(d);
+                Node middleNode =  new Node(d,current,current.next);
+                current = middleNode.next.prior = middleNode.prior.next =middleNode;
             }
         }
+        
         numberOfElements+=1;
         return this;
     }
