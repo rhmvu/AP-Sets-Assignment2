@@ -40,12 +40,11 @@ public class Main {
     public void parseAssignment(Scanner input) throws APException {
     	input.useDelimiter("\\=");
     	IdentifierInterface identifier = parseIdentifier(input.next());
-    	System.out.println("Identifier: " + identifier.toString());
+    	//System.out.println("Identifier: " + identifier.toString());
     	
     	Scanner expression = new Scanner(input.next());
-    	//System.out.println("Expression1: " + expression.next());
     	SetInterface<BigInteger> set = parseExpression(expression);
-    	System.out.println("Set: " + set.toString());
+    	//System.out.println("Set: " + set.toString());
     	sets.put(identifier, set);
     }
     
@@ -61,10 +60,9 @@ public class Main {
     	if(result.hasCorrectIdentifierFormat(input)) {
     		result.appendIdentifier(input);
         } else {
-            System.out.println("Wrong: " + input);
+            //System.out.println("Wrong: " + input);
             throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
         }
-    	System.out.println("Identifier1: " + result.toString());
     	
         return result;
     }
@@ -72,22 +70,31 @@ public class Main {
     private SetInterface<BigInteger> parseExpression(Scanner expression) throws APException {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
     	StringBuilder term = new StringBuilder();
+    	int complexFactors = 0;
     	
     	while (expression.hasNext()) {
     		
-    		if (nextCharIs(expression, '+')) {
+    		if (nextCharIs(expression, '(')) {
+    			complexFactors+=1;
+        		term.append(expression.next());
+    			
+    		} else if (nextCharIs(expression, ')')) {
+    			complexFactors-=1;
+        		term.append(expression.next());
+    			
+    		} else if (nextCharIs(expression, '+') && complexFactors == 0) {
         		expression.skip("\\+");
         		result = parseTerm(new Scanner(term.toString()));
         		Scanner newExpression = new Scanner(expression.nextLine());
         		return result.union(parseExpression(newExpression));
         		
-        	} else if (nextCharIs(expression, '|')) {
+        	} else if (nextCharIs(expression, '|') && complexFactors == 0) {
         		expression.skip("\\|");
         		result = parseTerm(new Scanner(term.toString()));
         		Scanner newExpression = new Scanner(expression.nextLine());
         		return result.symDifference(parseExpression(newExpression));
         		
-        	} else if (nextCharIs(expression, '-')) {
+        	} else if (nextCharIs(expression, '-') && complexFactors == 0) {
         		expression.skip("\\-");
         		result = parseTerm(new Scanner(term.toString()));
         		Scanner newExpression = new Scanner(expression.nextLine());
@@ -97,7 +104,7 @@ public class Main {
         		term.append(expression.next());
         	}
     	}
-		System.out.println("Term: " + term.toString());
+		//System.out.println("Term: " + term.toString());
 		result = parseTerm(new Scanner(term.toString()));
     	
     	return result;
@@ -110,7 +117,7 @@ public class Main {
     	while (term.hasNext() && !nextCharIs(term, '*')) {
     		factor.append(term.next());
     	}
-		System.out.println("Factor: " + factor.toString());
+		//System.out.println("Factor: " + factor.toString());
 		result = parseFactor(new Scanner(factor.toString()));
     	
     	if (nextCharIs(term, '*')) {
@@ -123,8 +130,10 @@ public class Main {
     
     private SetInterface<BigInteger> parseFactor(Scanner factor) throws APException {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
+    	int complexFactors = 0;
     	
     	while(factor.hasNext()) {
+    		
 	    	if (nextCharIsLetter(factor)) {
 	    		StringBuilder id = new StringBuilder();
 	    		
@@ -134,10 +143,9 @@ public class Main {
 	        		id.append(factor.next());
 	    		}
 	    		IdentifierInterface identifier = parseIdentifier(id.toString());
-	        	System.out.println("Identifier2: " + identifier.toString());
 	        	
-	    		result = sets.get(identifier);
-	    		
+        		result = sets.get(identifier);
+	        	
 	    	} else if (nextCharIs(factor, '{')) {
 	    		factor.skip("\\{");
     			StringBuilder set = new StringBuilder();
@@ -146,24 +154,38 @@ public class Main {
 	    			set.append(factor.next());
 	    		}
 	    		factor.skip("\\}");
-    			System.out.println("testSet: " + set.toString());
+    			//System.out.println("testSet: " + set.toString());
 	    		
 	    		result = parseSet(set.toString());
 	    		
 	    	} else if (nextCharIs(factor, '(')) {
 	    		factor.skip("\\(");
     			StringBuilder expression = new StringBuilder();
-	    		
-	    		while (!nextCharIs(factor, ')')) {
-	    			expression.append(factor.next());
+
+				complexFactors += 1;
+	    		while (complexFactors != 0) {
+	    				
+    				while(!nextCharIs(factor, ')')) {
+    					
+    					if (nextCharIs(factor, '(')) {
+    						complexFactors += 1;
+    					}
+    	    			expression.append(factor.next());
+    				}
+	    			 if (nextCharIs(factor, ')')) {
+	    				complexFactors -= 1;
+	    			}
+	    			 if (complexFactors != 0 ) {
+	    				 expression.append(factor.next());
+	    			 }
 	    		}
 	    		factor.skip("\\)");
-    			System.out.println("Expression2: " + expression.toString());
+    			//System.out.println("Expression2: " + expression.toString());
     			Scanner expressionScanner = new Scanner(expression.toString());
 	    		
 	    		result = parseExpression(expressionScanner);
 	    	} else {
-	    		throw new APException("hey");
+	    		throw new APException("What now...");
 	    	}
     	}
     	
@@ -179,7 +201,7 @@ public class Main {
     		result.insert(parser.nextBigInteger());
     	}
     	parser.close();
-		System.out.println("TestSet2: " + result.toString());
+		//System.out.println("TestSet2: " + result.toString());
     	
     	return result;
     }
