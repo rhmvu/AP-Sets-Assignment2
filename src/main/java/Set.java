@@ -16,9 +16,9 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         SetInterface<E> result = toUnion.copy();
         this.set.goToFirst();
         do{
-            System.out.printf("result = %s\n",result.toString());
+            System.out.println("result =  " + result.toString());
             if(!result.contains(this.set.retrieve())){
-                System.out.printf("inserting:%d",this.set.retrieve());
+                System.out.println("inserting: " + this.set.retrieve());
                 result.insert(this.set.retrieve());
             }
         }while(this.set.goToNext());
@@ -28,7 +28,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
 
     @Override
     public SetInterface<E> intersection(SetInterface<E> toIntersect){
-        SetInterface<E> result = new Set();
+        SetInterface<E> result = new Set<E>();
         this.set.goToFirst();
         do{
             if(toIntersect.contains(this.set.retrieve())){
