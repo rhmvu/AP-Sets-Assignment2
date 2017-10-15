@@ -13,12 +13,18 @@ public class Set<E extends Comparable> implements SetInterface<E>{
 
     @Override
     public SetInterface<E> union(SetInterface<E> toUnion){
+        if (toUnion.isEmpty()) {
+            return this.copy();
+        }
         SetInterface<E> result = toUnion.copy();
+        if (this.isEmpty()) {
+            return result;
+        }
         this.set.goToFirst();
         do{
-            System.out.println("result =  " + result.toString());
+            //System.out.println("result =  " + result.toString());
             if(!result.contains(this.set.retrieve())){
-                System.out.println("inserting: " + this.set.retrieve());
+                //System.out.println("inserting: " + this.set.retrieve());
                 result.insert(this.set.retrieve());
             }
         }while(this.set.goToNext());
@@ -29,6 +35,9 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     @Override
     public SetInterface<E> intersection(SetInterface<E> toIntersect){
         SetInterface<E> result = new Set<E>();
+        if (this.isEmpty() || set.isEmpty()) {
+        	return result;
+        }
         this.set.goToFirst();
         do{
             if(toIntersect.contains(this.set.retrieve())){
@@ -40,13 +49,17 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     @Override
     public SetInterface<E> complement(SetInterface<E> toComplement){
         SetInterface<E> result = this.copy();
+        
+        if (this.isEmpty() || set.isEmpty()) {
+        	return result;
+        }
         this.set.goToFirst();
         do{
-            System.out.printf("result = %s\n",result.toString());
-            System.out.printf("set2= %s\n",toComplement.toString());
+            //System.out.printf("result = %s\n",result.toString());
+            //System.out.printf("set2= %s\n",toComplement.toString());
 
             if(toComplement.contains(this.set.retrieve())){
-                System.out.printf("contains = %d\n",this.set.retrieve());
+                //System.out.printf("contains = %d\n",this.set.retrieve());
                 result.remove(this.set.retrieve());
             }
         }while(this.set.goToNext());
@@ -55,8 +68,8 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     @Override
     public SetInterface<E> symDifference(SetInterface<E> toSymDiffer){
         SetInterface<E> union = this.union(toSymDiffer);
-        SetInterface<E> intersect = this.intersection(toSymDiffer);
-        return union.complement(intersect);
+        SetInterface<E> intersection = this.intersection(toSymDiffer);
+        return union.complement(intersection);
     }
 
     @Override
@@ -84,8 +97,8 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     public SetInterface<E> remove(E d){
         if(set.find(d)) {
             set.remove();
-            System.out.printf("Set removed\n");
-            System.out.printf("Set Size = %d",this.size());
+            //System.out.printf("Set removed\n");
+            //System.out.printf("Set Size = %d",this.size());
         }
         return this;
     }
