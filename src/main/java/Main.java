@@ -51,7 +51,8 @@ public class Main {
     public void printStatement(Scanner input) throws APException {
     	input.skip("\\?");
         SetInterface<BigInteger> set = parseExpression(input);
-        System.out.println("Output: " + set.toString());
+        //System.out.println("Output: " + set.toString());
+        System.out.println(set.toString());
     }
     
     private IdentifierInterface parseIdentifier(String input) throws APException {
@@ -75,11 +76,11 @@ public class Main {
     	while (expression.hasNext()) {
     		
     		if (nextCharIs(expression, '(')) {
-    			complexFactors+=1;
+    			complexFactors += 1;
         		term.append(expression.next());
     			
     		} else if (nextCharIs(expression, ')')) {
-    			complexFactors-=1;
+    			complexFactors -= 1;
         		term.append(expression.next());
     			
     		} else if (nextCharIs(expression, '+') && complexFactors == 0) {
@@ -113,17 +114,30 @@ public class Main {
     private SetInterface<BigInteger> parseTerm(Scanner term) throws APException {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
     	StringBuilder factor = new StringBuilder();
+    	int complexFactors = 0;
     	
-    	while (term.hasNext() && !nextCharIs(term, '*')) {
+    	while (term.hasNext()) {
+    		
+    		if (nextCharIs(term, '(')) {
+    			complexFactors += 1;
+    			factor.append(term.next());
+    			
+    		} else if (nextCharIs(term, ')')) {
+    			complexFactors -= 1;
+    			factor.append(term.next());
+    			
+    		} else if (nextCharIs(term, '*') && complexFactors == 0) {
+        		term.skip("\\*");
+        		result = parseFactor(new Scanner(factor.toString())).intersection(parseTerm(new Scanner(term.nextLine())));
+        		return result;
+    		} else {
     		factor.append(term.next());
+        	}
     	}
 		//System.out.println("Factor: " + factor.toString());
 		result = parseFactor(new Scanner(factor.toString()));
     	
-    	if (nextCharIs(term, '*')) {
-    		term.skip("\\*");
-    		result = result.intersection(parseTerm(new Scanner(term.nextLine())));
-    	}
+    	
     	
     	return result;
     }
