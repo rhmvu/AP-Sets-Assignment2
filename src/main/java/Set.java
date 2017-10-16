@@ -36,6 +36,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     public SetInterface<E> intersection(SetInterface<E> toIntersect){
         SetInterface<E> result = new Set<E>();
         if (this.isEmpty() || set.isEmpty()) {
+        	//System.out.println("result " + result.toString());
         	return result;
         }
         this.set.goToFirst();
@@ -44,6 +45,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
                 result.insert(this.set.retrieve());
             }
         }while(this.set.goToNext());
+    	//System.out.println("result " + result.toString());
         return result;
     }
     @Override
