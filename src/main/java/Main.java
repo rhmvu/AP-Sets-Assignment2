@@ -19,11 +19,11 @@ public class Main {
 
     
     PrintStream out;
-    HashMap<IdentifierInterface, SetInterface<BigInteger>> sets;
+    HashMap<IdentifierInterface, SetInterface<BigInteger>> setCollection;
 
     Main(){
         out = new PrintStream(System.out);
-        sets = new HashMap<IdentifierInterface, SetInterface<BigInteger>>();
+        setCollection = new HashMap<IdentifierInterface, SetInterface<BigInteger>>();
     }
     
     public void parseStatement(Scanner input) throws APException {
@@ -45,7 +45,7 @@ public class Main {
     	Scanner expression = new Scanner(input.next());
     	SetInterface<BigInteger> set = parseExpression(expression);
     	//System.out.println("Set: " + set.toString());
-    	sets.put(identifier, set);
+    	setCollection.put(identifier, set);
     }
     
     public void printStatement(Scanner input) throws APException {
@@ -55,7 +55,7 @@ public class Main {
         System.out.println(set.toString());
     }
     
-    private IdentifierInterface parseIdentifier(String input) throws APException {
+    public IdentifierInterface parseIdentifier(String input) throws APException {
     	IdentifierInterface result = new Identifier();
     	
     	if(result.hasCorrectIdentifierFormat(input)) {
@@ -68,8 +68,9 @@ public class Main {
         return result;
     }
     
-    private SetInterface<BigInteger> parseExpression(Scanner expression) throws APException {
+    public SetInterface<BigInteger> parseExpression(Scanner expression) throws APException {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
+    	result = null;
     	StringBuilder term = new StringBuilder();
     	int complexFactors = 0;
     	
@@ -85,25 +86,68 @@ public class Main {
     			
     		} else if (nextCharIs(expression, '+') && complexFactors == 0) {
 	    		skipToken(expression.next(), '+');
-        		result = parseTerm(new Scanner(term.toString()));
-        		Scanner newExpression = new Scanner(expression.nextLine());
-        		
-        		return result.union(parseExpression(newExpression));
+	    		
+	    		if (result == null) {
+		    		result = parseTerm(new Scanner(term.toString()));
+	    		}
+	    		term.setLength(0);
+	    		
+	    		if (nextCharIs(expression, '(')) {
+	    			term.append(expression.nextLine());
+	    			result = result.union(parseExpression(new Scanner(term.toString())));
+		    		//System.out.println("result: " + result.toString());
+	    		} else {
+	    		
+		    		while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+	        		
+		    			term.append(expression.next());
+		    		}
+		    		result = result.union(parseTerm(new Scanner(term.toString())));
+		    		//System.out.println("result: " + result.toString());
+	    		}
         		
         	} else if (nextCharIs(expression, '|') && complexFactors == 0) {
-	    		skipToken(expression.next(), '|');
-        		result = parseTerm(new Scanner(term.toString()));
-        		Scanner newExpression = new Scanner(expression.nextLine());
-        		
-        		return result.symDifference(parseExpression(newExpression));
-        		
+        		skipToken(expression.next(), '|');
+	    		
+	    		if (result == null) {
+		    		result = parseTerm(new Scanner(term.toString()));
+	    		}
+	    		term.setLength(0);
+	    		
+	    		if (nextCharIs(expression, '(')) {
+	    			term.append(expression.nextLine());
+	    			result = result.symDifference(parseExpression(new Scanner(term.toString())));
+		    		//System.out.println("result: " + result.toString());
+	    		} else {
+	    		
+		    		while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+	        		
+		    			term.append(expression.next());
+		    		}
+		    		result = result.symDifference(parseTerm(new Scanner(term.toString())));
+		    		//System.out.println("result: " + result.toString());
+	    		}
         	} else if (nextCharIs(expression, '-') && complexFactors == 0) {
-	    		skipToken(expression.next(), '-');
-        		result = parseTerm(new Scanner(term.toString()));
-        		Scanner newExpression = new Scanner(expression.nextLine());
-        		
-        		return result.complement(parseExpression(newExpression));
-        		
+        		skipToken(expression.next(), '-');
+	    		
+	    		if (result == null) {
+		    		result = parseTerm(new Scanner(term.toString()));
+	    		}
+	    		term.setLength(0);
+	    		
+	    		if (nextCharIs(expression, '(')) {
+	    			term.append(expression.nextLine());
+	    			result = result.complement(parseExpression(new Scanner(term.toString())));
+		    		//System.out.println("result: " + result.toString());
+	    		} else {
+	    		
+		    		while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+	        		
+		    			term.append(expression.next());
+		    		}
+		    		result = result.complement(parseTerm(new Scanner(term.toString())));
+		    		//System.out.println("result: " + result.toString());
+	    		}
         	} else {
         		term.append(expression.next());
         	}
@@ -112,12 +156,14 @@ public class Main {
     		throw new APException("Missing parenthesis detected");
     	}
 		//System.out.println("Term: " + term.toString());
-		result = parseTerm(new Scanner(term.toString()));
+    	if (result == null) {
+    		result = parseTerm(new Scanner(term.toString()));
+    	}
     	
     	return result;
     }
     
-    private SetInterface<BigInteger> parseTerm(Scanner term) throws APException {
+    public SetInterface<BigInteger> parseTerm(Scanner term) throws APException {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
     	StringBuilder factor = new StringBuilder();
     	int complexFactors = 0;
@@ -144,12 +190,10 @@ public class Main {
 		//System.out.println("Factor: " + factor.toString());
 		result = parseFactor(new Scanner(factor.toString()));
     	
-    	
-    	
     	return result;
     }
     
-    private SetInterface<BigInteger> parseFactor(Scanner factor) throws APException {
+    public SetInterface<BigInteger> parseFactor(Scanner factor) throws APException {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
     	int complexFactors = 0;
     	
@@ -165,8 +209,8 @@ public class Main {
 	    		}
 	    		IdentifierInterface identifier = parseIdentifier(id.toString());
 	        	
-    			if (sets.containsKey(identifier)) {
-    				result = sets.get(identifier);
+    			if (setCollection.containsKey(identifier)) {
+    				result = setCollection.get(identifier);
     			} else {
     				throw new APException("Identifier does not correspond to a Set");
     			}
@@ -186,8 +230,8 @@ public class Main {
 	    	} else if (nextCharIs(factor, '(')) {
 	    		skipToken(factor.next(), '(');
     			StringBuilder expression = new StringBuilder();
-
 				complexFactors += 1;
+				
 	    		while (complexFactors != 0) {
 	    				
     				while(!nextCharIs(factor, ')')) {
@@ -197,12 +241,12 @@ public class Main {
     					}
     	    			expression.append(factor.next());
     				}
-	    			 if (nextCharIs(factor, ')')) {
+	    			if (nextCharIs(factor, ')')) {
 	    				complexFactors -= 1;
 	    			}
-	    			 if (complexFactors != 0 ) {
+	    			if (complexFactors != 0 ) {
 	    				 expression.append(factor.next());
-	    			 }
+	    			}
 	    		}
 	    		skipToken(factor.next(), ')');
     			//System.out.println("Expression2: " + expression.toString());
@@ -217,7 +261,7 @@ public class Main {
     	return result;
     }
     
-    private SetInterface<BigInteger> parseSet(String numbers) {
+    public SetInterface<BigInteger> parseSet(String numbers) {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
     	Scanner parser = new Scanner(numbers);
     	parser.useDelimiter(",");
@@ -234,7 +278,7 @@ public class Main {
     private void skipToken (String input, char c) throws APException {
     	Scanner token = new Scanner(input);
     	if (! nextCharIs(token, c)) {
-    		throw new APException("Missing token");
+    		throw new APException("Missing token: " + c);
 	    }
     }
     
@@ -258,9 +302,8 @@ public class Main {
 
 			try {
 				parseStatement(statement);
-			}
-			catch (APException e) {
-				out.println(e);
+			} catch (APException e) {
+				System.out.println(e);
 			}
 		}
         in.close();
