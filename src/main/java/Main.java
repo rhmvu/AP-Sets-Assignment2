@@ -49,7 +49,7 @@ public class Main {
     }
     
     public void printStatement(Scanner input) throws APException {
-    	input.skip("\\?");
+		skipToken(input.next(), '?');
         SetInterface<BigInteger> set = parseExpression(input);
         //System.out.println("Output: " + set.toString());
         System.out.println(set.toString());
@@ -84,26 +84,32 @@ public class Main {
         		term.append(expression.next());
     			
     		} else if (nextCharIs(expression, '+') && complexFactors == 0) {
-        		expression.skip("\\+");
+	    		skipToken(expression.next(), '+');
         		result = parseTerm(new Scanner(term.toString()));
         		Scanner newExpression = new Scanner(expression.nextLine());
+        		
         		return result.union(parseExpression(newExpression));
         		
         	} else if (nextCharIs(expression, '|') && complexFactors == 0) {
-        		expression.skip("\\|");
+	    		skipToken(expression.next(), '|');
         		result = parseTerm(new Scanner(term.toString()));
         		Scanner newExpression = new Scanner(expression.nextLine());
+        		
         		return result.symDifference(parseExpression(newExpression));
         		
         	} else if (nextCharIs(expression, '-') && complexFactors == 0) {
-        		expression.skip("\\-");
+	    		skipToken(expression.next(), '-');
         		result = parseTerm(new Scanner(term.toString()));
         		Scanner newExpression = new Scanner(expression.nextLine());
+        		
         		return result.complement(parseExpression(newExpression));
         		
         	} else {
         		term.append(expression.next());
         	}
+    	}
+    	if (complexFactors != 0) {
+    		throw new APException("Missing parenthesis detected");
     	}
 		//System.out.println("Term: " + term.toString());
 		result = parseTerm(new Scanner(term.toString()));
@@ -127,11 +133,12 @@ public class Main {
     			factor.append(term.next());
     			
     		} else if (nextCharIs(term, '*') && complexFactors == 0) {
-        		term.skip("\\*");
+	    		skipToken(term.next(), '*');
         		result = parseFactor(new Scanner(factor.toString())).intersection(parseTerm(new Scanner(term.nextLine())));
         		return result;
+        		
     		} else {
-    		factor.append(term.next());
+    			factor.append(term.next());
         	}
     	}
 		//System.out.println("Factor: " + factor.toString());
@@ -158,22 +165,26 @@ public class Main {
 	    		}
 	    		IdentifierInterface identifier = parseIdentifier(id.toString());
 	        	
-        		result = sets.get(identifier);
+    			if (sets.containsKey(identifier)) {
+    				result = sets.get(identifier);
+    			} else {
+    				throw new APException("Identifier does not correspond to a Set");
+    			}
 	        	
 	    	} else if (nextCharIs(factor, '{')) {
-	    		factor.skip("\\{");
+	    		skipToken(factor.next(), '{');
     			StringBuilder set = new StringBuilder();
     			
 	    		while (!nextCharIs(factor, '}')) {
 	    			set.append(factor.next());
 	    		}
-	    		factor.skip("\\}");
+	    		skipToken(factor.next(), '}');
     			//System.out.println("testSet: " + set.toString());
 	    		
 	    		result = parseSet(set.toString());
 	    		
 	    	} else if (nextCharIs(factor, '(')) {
-	    		factor.skip("\\(");
+	    		skipToken(factor.next(), '(');
     			StringBuilder expression = new StringBuilder();
 
 				complexFactors += 1;
@@ -193,7 +204,7 @@ public class Main {
 	    				 expression.append(factor.next());
 	    			 }
 	    		}
-	    		factor.skip("\\)");
+	    		skipToken(factor.next(), ')');
     			//System.out.println("Expression2: " + expression.toString());
     			Scanner expressionScanner = new Scanner(expression.toString());
 	    		
@@ -218,6 +229,13 @@ public class Main {
 		//System.out.println("TestSet2: " + result.toString());
     	
     	return result;
+    }
+    
+    private void skipToken (String input, char c) throws APException {
+    	Scanner token = new Scanner(input);
+    	if (! nextCharIs(token, c)) {
+    		throw new APException("Missing token");
+	    }
     }
     
     private boolean nextCharIsLetter(Scanner input){
