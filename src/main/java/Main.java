@@ -97,13 +97,14 @@ public class Main {
     		
     		if (nextCharIs(expression, '(')) {
     			complexFactors += 1;
-        		term.append(expression.next());
-    			
-    		} else if (nextCharIs(expression, ')')) {
+    		}
+    		if (nextCharIs(expression, ')')) {
+        		//System.out.println("Term: " + term.toString());
     			complexFactors -= 1;
-        		term.append(expression.next());
-    			
-    		} else if (nextCharIs(expression, '+') && complexFactors == 0) {
+    		}
+    		
+    		if (nextCharIs(expression, '+') && complexFactors == 0) {
+        		//System.out.println("Term: " + term.toString());
 	    		skipToken(expression.next(), '+');
 	    		
 	    		if (result == null) {
@@ -111,22 +112,19 @@ public class Main {
 	    		}
 	    		term.setLength(0);
 	    		
-	    		if (nextCharIs(expression, '(')) {
-	    			term.append(expression.nextLine());
-	    			result = result.union(parseExpression(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
-	    		} else {
-	    		
-		    		while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
-		    			
-		    			term.append(expression.next());
-		    			//System.out.println("test " + term.toString());
-		    		}
-		    		//System.out.println("C2 " + complexFactors);
-		    		result = result.union(parseTerm(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
-	    		}
-        		
+    			while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+    				if (nextCharIs(expression, '(')) {
+    					while (!nextCharIs(expression, ')')) {
+    	    				term.append(expression.next());
+    					}
+        				term.append(expression.next());
+    	    		} else {
+    	    			term.append(expression.next());
+    	    		}
+    				//System.out.println("test " + term.toString());
+    			}
+    			result = result.union(parseTerm(new Scanner(term.toString())));
+	    		//System.out.println("result: " + result.toString());
         	} else if (nextCharIs(expression, '|') && complexFactors == 0) {
         		skipToken(expression.next(), '|');
 	    		
@@ -135,19 +133,19 @@ public class Main {
 	    		}
 	    		term.setLength(0);
 	    		
-	    		if (nextCharIs(expression, '(')) {
-	    			term.append(expression.nextLine());
-	    			result = result.symDifference(parseExpression(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
-	    		} else {
-	    		
-		    		while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
-	        		
-		    			term.append(expression.next());
-		    		}
-		    		result = result.symDifference(parseTerm(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
-	    		}
+    			while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+    				if (nextCharIs(expression, '(')) {
+    					while (!nextCharIs(expression, ')')) {
+    	    				term.append(expression.next());
+    					}
+        				term.append(expression.next());
+    	    		} else {
+    	    			term.append(expression.next());
+    	    		}
+    				//System.out.println("test " + term.toString());
+    			}
+    			result = result.symDifference(parseTerm(new Scanner(term.toString())));
+	    		//System.out.println("result: " + result.toString());
         	} else if (nextCharIs(expression, '-') && complexFactors == 0) {
         		skipToken(expression.next(), '-');
 	    		
@@ -156,27 +154,23 @@ public class Main {
 	    		}
 	    		term.setLength(0);
 	    		
-	    		if (nextCharIs(expression, '(')) {
-	    			term.append(expression.nextLine());
-	    			result = result.complement(parseExpression(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
-	    		} else {
-	    		
-		    		while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
-	        		
-		    			term.append(expression.next());
-		    			//System.out.println("test " + term.toString());
-		    		}
-		    		//System.out.println("C2 " + complexFactors);
-		    		result = result.complement(parseTerm(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
-	    		}
+    			while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+    				if (nextCharIs(expression, '(')) {
+    					while (!nextCharIs(expression, ')')) {
+    	    				term.append(expression.next());
+    					}
+        				term.append(expression.next());
+    	    		} else {
+    	    			term.append(expression.next());
+    	    		}
+    				//System.out.println("test " + term.toString());
+    			}
+    			result = result.complement(parseTerm(new Scanner(term.toString())));
+	    		//System.out.println("result: " + result.toString());
         	} else {
         		term.append(expression.next());
+        		//System.out.println("Term: " + term.toString());
         	}
-    	}
-    	if (complexFactors != 0) {
-    		throw new APException("Missing parenthesis detected");
     	}
 		//System.out.println("Term: " + term.toString());
     	if (result == null) {
@@ -192,16 +186,13 @@ public class Main {
     	int complexFactors = 0;
     	
     	while (term.hasNext()) {
-    		//System.out.println("C: " + complexFactors);
     		if (nextCharIs(term, '(')) {
     			complexFactors += 1;
-    			factor.append(term.next());
-    			
-    		} else if (nextCharIs(term, ')')) {
+    		}
+    		if (nextCharIs(term, ')')) {
     			complexFactors -= 1;
-    			factor.append(term.next());
-    			
-    		} else if (nextCharIs(term, '*') && complexFactors == 0) {
+    		}
+    		if (nextCharIs(term, '*') && complexFactors == 0) {
 	    		skipToken(term.next(), '*');
 	    		//System.out.println("F: " + factor.toString());
         		result = parseFactor(new Scanner(factor.toString())).intersection(parseTerm(new Scanner(term.nextLine())));
@@ -224,7 +215,28 @@ public class Main {
     	
     	while(factor.hasNext()) {
     		
-	    	if (nextCharIsLetter(factor)) {
+    		if (nextCharIs(factor, '(')) {
+	    		StringBuilder set = new StringBuilder();
+	    		skipToken(factor.next(), '(');
+    			complexFactors += 1;
+    			while (factor.hasNext() && complexFactors != 0) {
+    				if (nextCharIs(factor, '(')) {
+    	    			complexFactors += 1;
+    	    			set.append(factor.next());
+    				} else if (nextCharIs(factor, ')')) {
+    	    			complexFactors -= 1;
+    	    			if (complexFactors == 0) {
+    	    	    		skipToken(factor.next(), ')');
+    	    			} else {
+    	    				set.append(factor.next());
+    	    			}
+    				}else {
+    					set.append(factor.next());
+    				}
+    			}
+				result = parseExpression(new Scanner(set.toString()));
+    			
+    		} else if (nextCharIsLetter(factor)) {
 	    		StringBuilder id = new StringBuilder();
 	    		
 	    		id.append(factor.next());
@@ -252,36 +264,12 @@ public class Main {
 	    		
 	    		result = parseSet(set.toString());
 	    		
-	    	} else if (nextCharIs(factor, '(')) {
-	    		skipToken(factor.next(), '(');
-    			StringBuilder expression = new StringBuilder();
-				complexFactors += 1;
-				
-	    		while (complexFactors != 0) {
-	    				
-    				while(!nextCharIs(factor, ')')) {
-    					
-    					if (nextCharIs(factor, '(')) {
-    						complexFactors += 1;
-    					}
-    					//System.out.println("E: " + expression.toString());
-    	    			expression.append(factor.next());
-    				}
-	    			if (nextCharIs(factor, ')')) {
-	    				complexFactors -= 1;
-	    			}
-	    			if (complexFactors != 0 ) {
-	    				 expression.append(factor.next());
-	    			}
-	    		}
-	    		skipToken(factor.next(), ')');
-    			//System.out.println("Expression2: " + expression.toString());
-    			Scanner expressionScanner = new Scanner(expression.toString());
-	    		
-	    		result = parseExpression(expressionScanner);
 	    	} else {
 	    		throw new APException("What now...");
 	    	}
+    	}
+    	if (complexFactors != 0) {
+    		throw new APException("Missing parenthesis detected");
     	}
     	
     	return result;
