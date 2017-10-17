@@ -232,12 +232,15 @@ public class Main {
         input.skip("\\{");
         Set result = new Set();
         BigInteger newElement;
+        input.useDelimiter(",");
         while(input.hasNext()){
             if(nextCharIs(input,',')) {
                 input.skip(",");
             }
             try {
-                newElement = input.nextBigInteger();
+                newElement = new BigInteger(input.next());
+                //newElement = input.nextBigInteger();
+                out.printf("next element:%s",newElement.toString());
             }catch(Exception e){
                 throw new APException("Couldn't parse inputted Set, end sets with a '}'");
             }
