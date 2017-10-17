@@ -82,9 +82,29 @@ public interface SetInterface<E extends Comparable> {
      **/
     SetInterface<E> fixDoubleOccurencies();
     /**	@precondition  -
-     *	@postcondition - The Set is returned in Stringform.
+     *	@postcondition - The whole Set is returned as a String.
      **/
     String toString();
 
+    /**	@precondition  -
+     *	@postcondition - The Set's current item is returned as a String.
+     **/
+    String get();
+
+    /**	@precondition  -
+     *	@postcondition - The Set's current pointer is set to the first element.
+     **/
+    boolean goToFirstElement();
+
+
+    /**	@precondition  -
+     *	@postcondition - The Set's current pointer is set to the last element.
+     **/
+    boolean goToLastElement();
+
+    /**	@precondition  -
+     *	@postcondition - The Set's current pointer is set to the next element.
+     **/
+    boolean goToNextElement();
 
 }
