@@ -51,9 +51,20 @@ public class Main {
     public void printStatement(Scanner input) throws APException {
 		skipToken(input.next(), '?');
         SetInterface<BigInteger> set = parseExpression(input);
-        //System.out.println("Output: " + set.toString());
-        System.out.println(set.toString());
+        System.out.println(SetToString(set));
     }
+
+    private String SetToString(SetInterface set){
+		StringBuilder output = new StringBuilder();
+		if(set.goToFirstElement()){
+			output.append(set.get());
+			while(set.goToNextElement()){
+				output.append(" ");
+				output.append(set.get());
+			}
+		}
+		return output.toString();
+	}
     
     public IdentifierInterface parseIdentifier(String input) throws APException {
     	IdentifierInterface result = new Identifier();
