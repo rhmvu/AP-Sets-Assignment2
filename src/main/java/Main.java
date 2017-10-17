@@ -35,6 +35,13 @@ public class Main {
     	} else if (!nextCharIs(input, '/')) {
     		throw new APException(INVALID_STATEMENT);
     	}
+    	eol(input);
+    }
+    
+    private void eol(Scanner input) throws APException {
+    	if (input.hasNext()) {
+    		throw new APException("no end of line");
+    	}
     }
     
     public void parseAssignment(Scanner input) throws APException {
@@ -95,15 +102,23 @@ public class Main {
 	    		if (nextCharIs(expression, '(')) {
 	    			term.append(expression.nextLine());
 	    			result = result.union(parseExpression(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
+		    		System.out.println("result: " + result.toString());
 	    		} else {
 	    		
 		    		while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
-	        		
+		    			if (nextCharIs(expression, '(')) {
+		        			complexFactors += 1;
+		        			term.append(expression.next());
+		        			
+		        		} else if (nextCharIs(expression, ')')) {
+		        			complexFactors -= 1;
+		        			term.append(expression.next());
+		        			
+		        		}
 		    			term.append(expression.next());
 		    		}
 		    		result = result.union(parseTerm(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
+		    		System.out.println("result: " + result.toString());
 	    		}
         		
         	} else if (nextCharIs(expression, '|') && complexFactors == 0) {
@@ -117,7 +132,7 @@ public class Main {
 	    		if (nextCharIs(expression, '(')) {
 	    			term.append(expression.nextLine());
 	    			result = result.symDifference(parseExpression(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
+		    		System.out.println("result: " + result.toString());
 	    		} else {
 	    		
 		    		while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
@@ -125,7 +140,7 @@ public class Main {
 		    			term.append(expression.next());
 		    		}
 		    		result = result.symDifference(parseTerm(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
+		    		System.out.println("result: " + result.toString());
 	    		}
         	} else if (nextCharIs(expression, '-') && complexFactors == 0) {
         		skipToken(expression.next(), '-');
@@ -138,7 +153,7 @@ public class Main {
 	    		if (nextCharIs(expression, '(')) {
 	    			term.append(expression.nextLine());
 	    			result = result.complement(parseExpression(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
+		    		System.out.println("result: " + result.toString());
 	    		} else {
 	    		
 		    		while (expression.hasNext() && !(nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
@@ -146,7 +161,7 @@ public class Main {
 		    			term.append(expression.next());
 		    		}
 		    		result = result.complement(parseTerm(new Scanner(term.toString())));
-		    		//System.out.println("result: " + result.toString());
+		    		System.out.println("result: " + result.toString());
 	    		}
         	} else {
         		term.append(expression.next());
@@ -155,7 +170,7 @@ public class Main {
     	if (complexFactors != 0) {
     		throw new APException("Missing parenthesis detected");
     	}
-		//System.out.println("Term: " + term.toString());
+		System.out.println("Term: " + term.toString());
     	if (result == null) {
     		result = parseTerm(new Scanner(term.toString()));
     	}
@@ -169,7 +184,7 @@ public class Main {
     	int complexFactors = 0;
     	
     	while (term.hasNext()) {
-    		
+    		System.out.println("C: " + complexFactors);
     		if (nextCharIs(term, '(')) {
     			complexFactors += 1;
     			factor.append(term.next());
@@ -180,14 +195,16 @@ public class Main {
     			
     		} else if (nextCharIs(term, '*') && complexFactors == 0) {
 	    		skipToken(term.next(), '*');
+	    		System.out.println("F: " + factor.toString());
         		result = parseFactor(new Scanner(factor.toString())).intersection(parseTerm(new Scanner(term.nextLine())));
+        		System.out.println("result*: " + result.toString());
         		return result;
         		
     		} else {
     			factor.append(term.next());
         	}
     	}
-		//System.out.println("Factor: " + factor.toString());
+		System.out.println("Factor: " + factor.toString());
 		result = parseFactor(new Scanner(factor.toString()));
     	
     	return result;
@@ -223,7 +240,7 @@ public class Main {
 	    			set.append(factor.next());
 	    		}
 	    		skipToken(factor.next(), '}');
-    			//System.out.println("testSet: " + set.toString());
+    			System.out.println("testSet: " + set.toString());
 	    		
 	    		result = parseSet(set.toString());
 	    		
@@ -239,6 +256,7 @@ public class Main {
     					if (nextCharIs(factor, '(')) {
     						complexFactors += 1;
     					}
+    					System.out.println("E: " + expression.toString());
     	    			expression.append(factor.next());
     				}
 	    			if (nextCharIs(factor, ')')) {
@@ -249,7 +267,7 @@ public class Main {
 	    			}
 	    		}
 	    		skipToken(factor.next(), ')');
-    			//System.out.println("Expression2: " + expression.toString());
+    			System.out.println("Expression2: " + expression.toString());
     			Scanner expressionScanner = new Scanner(expression.toString());
 	    		
 	    		result = parseExpression(expressionScanner);
@@ -270,7 +288,7 @@ public class Main {
     		result.insert(parser.nextBigInteger());
     	}
     	parser.close();
-		//System.out.println("TestSet2: " + result.toString());
+		System.out.println("TestSet2: " + result.toString());
     	
     	return result;
     }
@@ -289,7 +307,6 @@ public class Main {
     
     private boolean nextCharIs(Scanner input, char c){
         input.useDelimiter("");
-        //System.out.println("Char: " + input.nextLine());
         return input.hasNext(Pattern.quote(c+""));
     }
     
