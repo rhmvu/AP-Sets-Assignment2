@@ -158,6 +158,29 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     }
 
     @Override
+    public String get(){
+        if (set.retrieve() == null){
+            return null;
+        }
+        return set.retrieve().toString();
+    }
+    @Override
+    public boolean goToFirstElement(){
+        return set.goToFirst();
+    }
+
+    @Override
+    public boolean goToLastElement(){
+        return set.goToLast();
+    }
+
+    @Override
+    public boolean goToNextElement(){
+        return set.goToNext();
+    }
+
+
+    @Override
     public int hashCode() {
         return this.toString().hashCode();
     }
