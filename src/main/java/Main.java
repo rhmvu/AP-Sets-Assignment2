@@ -28,12 +28,13 @@ public class Main {
     
     public void parseStatement(Scanner input) throws APException {
     
-    	if (nextCharIsLetter(input)) {
+    	if (nextCharIs(input, '/')) { 
+    		// Do nothing
+    	} else if (nextCharIsLetter(input)) {
             parseAssignment(input);
     	} else if (nextCharIs(input, '?')) {
     		printStatement(input);
-    	} else if (!nextCharIs(input, '/')) {
-    		
+    	} else {
     		throw new APException(INVALID_STATEMENT);
     	}
     	//eol(input);
@@ -46,13 +47,14 @@ public class Main {
     }
     
     public void parseAssignment(Scanner input) throws APException {
+    	SetInterface<BigInteger> set = new Set<BigInteger>();
     	input.useDelimiter("\\=");
     	IdentifierInterface identifier = parseIdentifier(input.next());
-    	//System.out.println("Identifier: " + identifier.toString());
-    	
-    	Scanner expression = new Scanner(input.next());
-    	SetInterface<BigInteger> set = parseExpression(expression);
-    	//System.out.println("Set: " + set.toString());
+    	try {
+        	set = parseExpression(new Scanner(input.next()));
+    	} catch (Exception e) {
+    		throw new APException(INVALID_STATEMENT);
+    	}
     	setCollection.put(identifier, set);
     }
     
@@ -64,6 +66,7 @@ public class Main {
 
     private String SetToString(SetInterface<BigInteger> set){
 		StringBuilder output = new StringBuilder();
+		
 		if(set.goToFirstElement()){
 			output.append(set.get());
 			while(set.goToNextElement()){
@@ -80,8 +83,7 @@ public class Main {
     	if(result.hasCorrectIdentifierFormat(input)) {
     		result.appendIdentifier(input);
         } else {
-            //System.out.println("Wrong: " + input);
-            throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
+            throw new APException("Identifier has not valid format");
         }
     	
         return result;
@@ -91,20 +93,17 @@ public class Main {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
     	result = null;
     	StringBuilder term = new StringBuilder();
-    	int complexFactors = 0;
+    	int openComplexFactors = 0;
 
     	while (expression.hasNext()) {
     		
     		if (nextCharIs(expression, '(')) {
-    			complexFactors += 1;
+    			openComplexFactors += 1;
 				term.append(expression.next());
-				
     		} else if (nextCharIs(expression, ')')) {
-    			complexFactors -= 1;
+    			openComplexFactors -= 1;
 				term.append(expression.next());
-				
-    		} else if (nextCharIs(expression, '+') && complexFactors == 0) {
-        		boolean b = true;
+    		} else if (nextCharIs(expression, '+') && openComplexFactors == 0) {
 	    		skipToken(expression.next(), '+');
 	    		
 	    		if (result == null) {
@@ -114,23 +113,25 @@ public class Main {
 	    		
     			while (expression.hasNext()) {
     				
-    				if (complexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+    				if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
     					result = result.union(parseTerm(new Scanner(term.toString())));
-    					b = false;
+    		    		term.setLength(0);
     					break;
     				} else if (nextCharIs(expression, '(')) {
-    					complexFactors +=1;
+    					openComplexFactors +=1;
 	    				term.append(expression.next());
     				} else if (nextCharIs(expression, ')')) {
-    					complexFactors -=1;
+    					openComplexFactors -=1;
         				term.append(expression.next());
     	    		} else {
     	    			term.append(expression.next());
     	    		}
     			}
-    			if (b)result = result.union(parseTerm(new Scanner(term.toString())));
     			
-        	} else if (nextCharIs(expression, '|') && complexFactors == 0) {
+    			if (term != null) {
+    				result = result.union(parseTerm(new Scanner(term.toString())));
+    			}
+        	} else if (nextCharIs(expression, '|') && openComplexFactors == 0) {
         		boolean b = true;
         		skipToken(expression.next(), '|');
 	    		
@@ -141,24 +142,24 @@ public class Main {
 	    		
 	    		while (expression.hasNext()) {
     				
-	    			if (complexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+	    			if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
     					result = result.symDifference(parseTerm(new Scanner(term.toString())));
-    					b = false;
+    		    		term.setLength(0);
     					break;
     				} else if (nextCharIs(expression, '(')) {
-    					complexFactors +=1;
+    					openComplexFactors +=1;
 	    				term.append(expression.next());
     				} else if (nextCharIs(expression, ')')) {
-    					complexFactors -=1;
+    					openComplexFactors -=1;
         				term.append(expression.next());
     	    		} else {
     	    			term.append(expression.next());
     	    		}
     			}
-	    		if (b)result = result.symDifference(parseTerm(new Scanner(term.toString())));
-    			
-        	} else if (nextCharIs(expression, '-') && complexFactors == 0) {
-        		boolean b = true;
+	    		if (result != null) {
+	    			result = result.symDifference(parseTerm(new Scanner(term.toString())));
+	    		}
+        	} else if (nextCharIs(expression, '-') && openComplexFactors == 0) {
         		skipToken(expression.next(), '-');
 	    		
 	    		if (result == null) {
@@ -168,22 +169,23 @@ public class Main {
 	    		
 	    		while (expression.hasNext()) {
     				
-	    			if (complexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+	    			if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
     					result = result.complement(parseTerm(new Scanner(term.toString())));
-    					b = false;
+    		    		term.setLength(0);
     					break;
     				} else if (nextCharIs(expression, '(')) {
-    					complexFactors +=1;
+    					openComplexFactors +=1;
 	    				term.append(expression.next());
     				} else if (nextCharIs(expression, ')')) {
-    					complexFactors -=1;
+    					openComplexFactors -=1;
         				term.append(expression.next());
     	    		} else {
     	    			term.append(expression.next());
     	    		}
     			}
-    			if (b)result = result.complement(parseTerm(new Scanner(term.toString())));
-
+	    		if (result != null) {
+	    			result = result.complement(parseTerm(new Scanner(term.toString())));
+	    		}
         	} else {
         		term.append(expression.next());
         	}
@@ -199,29 +201,24 @@ public class Main {
     public SetInterface<BigInteger> parseTerm(Scanner term) throws APException {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
     	StringBuilder factor = new StringBuilder();
-    	int complexFactors = 0;
+    	int openComplexFactors = 0;
     	
     	while (term.hasNext()) {
+    		
     		if (nextCharIs(term, '(')) {
-    			complexFactors += 1;
+    			openComplexFactors += 1;
     			factor.append(term.next());
-    			
     		} else if (nextCharIs(term, ')')) {
-    			complexFactors -= 1;
+    			openComplexFactors -= 1;
     			factor.append(term.next());
-    			
-    		} else if (nextCharIs(term, '*') && complexFactors == 0) {
+    		} else if (nextCharIs(term, '*') && openComplexFactors == 0) {
 	    		skipToken(term.next(), '*');
-	    		//System.out.println("F: " + factor.toString());
         		result = parseFactor(new Scanner(factor.toString())).intersection(parseTerm(new Scanner(term.nextLine())));
-        		//System.out.println("result*: " + result.toString());
         		return result;
-        		
     		} else {
     			factor.append(term.next());
         	}
     	}
-		//System.out.println("Factor: " + factor.toString());
 		result = parseFactor(new Scanner(factor.toString()));
     	
     	return result;
@@ -229,22 +226,28 @@ public class Main {
     
     public SetInterface<BigInteger> parseFactor(Scanner factor) throws APException {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
-    	int complexFactors = 0;
+    	int openComplexFactors = 0;
 		StringBuilder set = new StringBuilder();
     	
     	while(factor.hasNext()) {
     		
     		if (nextCharIs(factor, '(')) {
 	    		skipToken(factor.next(), '(');
-    			complexFactors += 1;
-    			while (factor.hasNext() && complexFactors != 0) {
+    			openComplexFactors += 1;
+    			while (factor.hasNext() && openComplexFactors != 0) {
+    				
     				if (nextCharIs(factor, '(')) {
-    	    			complexFactors += 1;
+    	    			openComplexFactors += 1;
     	    			set.append(factor.next());
     				} else if (nextCharIs(factor, ')')) {
-    	    			complexFactors -= 1;
-    	    			if (complexFactors == 0) {
-    	    	    		skipToken(factor.next(), ')');
+    	    			openComplexFactors -= 1;
+    	    			
+    	    			if (openComplexFactors == 0) {
+    	    				if (factor.hasNext()) {
+    	    	    			skipToken(factor.next(), ')');
+    	    	    		} else {
+    	    	    			throw new APException("Invalid token detected");
+    	    	    		}
     	    			} else {
     	    				set.append(factor.next());
     	    			}
@@ -253,7 +256,6 @@ public class Main {
     				}
     			}
 				result = parseExpression(new Scanner(set.toString()));
-    			
     		} else if (nextCharIsLetter(factor)) {
 	    		
     			set.append(factor.next());
@@ -268,41 +270,51 @@ public class Main {
     			} else {
     				throw new APException("Identifier does not correspond to a Set");
     			}
-	        	
 	    	} else if (nextCharIs(factor, '{')) {
 	    		skipToken(factor.next(), '{');
     			
-	    		while (!nextCharIs(factor, '}')) {
+	    		while (!nextCharIs(factor, '}') && factor.hasNext()) {
 	    			set.append(factor.next());
 	    		}
-	    		skipToken(factor.next(), '}');
-    			//System.out.println("testSet: " + set.toString());
 	    		
+	    		if (factor.hasNext()) {
+	    			skipToken(factor.next(), '}');
+	    		} else {
+	    			throw new APException("Invalid token detected");
+	    		}
+	    		
+	    		if (factor.hasNext()) {
+	    			throw new APException("Operator missing / No end of line");
+	    		}
 	    		result = parseSet(set.toString());
-	    		
 	    	} else {
 	    		throw new APException("What now...");
 	    	}
     	}
-    	if (complexFactors != 0) {
-			//System.out.println("ggggg: " + set.toString());
+    	if (openComplexFactors != 0) {
     		throw new APException("Missing parenthesis detected");
     	}
     	
     	return result;
     }
     
-    public SetInterface<BigInteger> parseSet(String numbers) {
+    public SetInterface<BigInteger> parseSet(String numbers) throws APException {
     	SetInterface<BigInteger> result = new Set<BigInteger>();
     	Scanner parser = new Scanner(numbers);
     	parser.useDelimiter(",");
     	
     	while (parser.hasNext()) {
-    		result.insert(parser.nextBigInteger());
+    		try {
+    			result.insert(parser.nextBigInteger());
+    		} catch (Exception e) {
+    			throw new APException("Invalid number");
+    		}
     	}
     	parser.close();
-		//System.out.println("TestSet2: " + result.toString());
     	
+    	if (result.hasDoubleOccurencies()) {
+    		result.fixDoubleOccurencies();
+    	}
     	return result;
     }
     
@@ -317,6 +329,11 @@ public class Main {
         input.useDelimiter("");
         return input.hasNext("[a-zA-Z]");
     }
+    
+    private boolean nextCharIsDigit (Scanner in) {
+        in.useDelimiter("");
+    	return in.hasNext("[0-9]"); 
+	}
     
     private boolean nextCharIs(Scanner input, char c){
         input.useDelimiter("");
