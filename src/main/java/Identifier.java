@@ -34,19 +34,11 @@ public class Identifier implements IdentifierInterface {
     @Override
     public boolean hasCorrectIdentifierFormat(String input){
     	
-        for (int i = 0; i < input.length();i++){
-        	if ((isLetter(input.charAt(i))) || (isDigit(input.charAt(i)))) {
-        		return true;
+        for (int i = 0; i < input.length(); i++){
+        	if (!Character.isLetter(input.charAt(i)) && !Character.isDigit(input.charAt(i))) {
+        		return false;
         	}
         }
-        return false;
-    }
-
-    private boolean isLetter(char input){
-        return Character.isLetter(input);
-    }
-
-    private boolean isDigit(char input){
-        return Character.isDigit(input);
+        return true;
     }
 }
