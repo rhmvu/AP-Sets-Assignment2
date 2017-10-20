@@ -6,12 +6,6 @@ import java.util.regex.Pattern;
 
 public class Main {
 
-	private static final String HELP_MESSAGE = "This Set interpreter works with operators +,-,* and Sets containing big Integers\n"
-			+ "Set Interpreter REQUIRES you to omit spaces in identifiers\n"
-			+"Allowed statements:\n?<Set/Factor> to output a set or factor\n"
-			+"<Identifier>=<Set/Factor> to assign a Set to an Identifier.\n\n"
-			+ "Set Interpreter by Kostas Moumtzakis & Ruben van der Ham";
-
 	PrintStream out;
 	HashMap<IdentifierInterface, SetInterface<BigInteger>> setCollection;
 
@@ -93,6 +87,7 @@ public class Main {
 		SetInterface<BigInteger> set;
 		input.useDelimiter("=");
 		IdentifierInterface identifier = parseIdentifier(input.next());
+		
 		try {
 			set = parseExpression(new Scanner(input.next()));
 		} catch (Exception e) {
@@ -120,6 +115,7 @@ public class Main {
 
 		if(set.goToFirstElement()){
 			output.append(set.get());
+			
 			while(set.goToNextElement()){
 				output.append(" ");
 				output.append(set.get());
@@ -172,7 +168,7 @@ public class Main {
 				term.setLength(0);
 
 				while (expression.hasNext()) {
-
+					
 					if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
 						result = operation(result, parseTerm(new Scanner(term.toString())), operator);
 						term.setLength(0);
@@ -187,7 +183,6 @@ public class Main {
 						term.append(expression.next());
 					}
 				}
-
 				if (term != null) {
 					result = operation(result, parseTerm(new Scanner(term.toString())), operator);
 				}
@@ -195,17 +190,22 @@ public class Main {
 				term.append(expression.next());
 			}
 		}
-
 		if (result == null) {
 			result = parseTerm(new Scanner(term.toString()));
 		}
 
 		return result;
 	}
-	
-	private SetInterface<BigInteger> operation(SetInterface<BigInteger> operhand1, SetInterface<BigInteger> operhand2, String operator) {
+	/**
+	 * Method that calculates the result of the operation between two sets
+	 * @param operhand1
+	 * @param operhand2
+	 * @param operation union/complement/symmetric difference 
+	 * @return
+	 */
+	private SetInterface<BigInteger> operation(SetInterface<BigInteger> operhand1, SetInterface<BigInteger> operhand2, String operation) {
 		SetInterface<BigInteger> result = new Set<>();
-		switch (operator) {
+		switch (operation) {
 		case "+":
 			result = operhand1.union(operhand2);
 			break;
@@ -392,13 +392,6 @@ public class Main {
 	}
 
 	public static void main(String[] argv) {
-		try {
-			if (argv[0].equals("--help")) {
-				System.out.println(HELP_MESSAGE);
-			}
-		} catch (Exception e){
-			new Main().start();
-		}
 		new Main().start();
 	}
 }
