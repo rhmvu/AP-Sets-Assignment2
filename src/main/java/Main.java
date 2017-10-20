@@ -198,22 +198,23 @@ public class Main {
 	}
 	/**
 	 * Method that calculates the result of the operation between two sets
-	 * @param operhand1
-	 * @param operhand2
+	 * @param operand1
+	 * @param operand2
 	 * @param operation union/complement/symmetric difference 
 	 * @return
 	 */
-	private SetInterface<BigInteger> operation(SetInterface<BigInteger> operhand1, SetInterface<BigInteger> operhand2, String operation) {
+	private SetInterface<BigInteger> operation(SetInterface<BigInteger> operand1, SetInterface<BigInteger> operand2, String operation) {
 		SetInterface<BigInteger> result = new Set<>();
 		switch (operation) {
 		case "+":
-			result = operhand1.union(operhand2);
+			result = operand1.union(operand2);
 			break;
 		case "-":
-			result = operhand1.complement(operhand2);
+			result = operand1.complement(operand2);
 			break;
+
 		case "|":
-			result = operhand1.symDifference(operhand2);
+			result = operand1.symDifference(operand2);
 			break;
 	}
 		return result;
