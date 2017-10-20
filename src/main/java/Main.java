@@ -8,7 +8,6 @@ public class Main {
 
 	private static final String HELP_MESSAGE = "This Set interpreter works with operators +,-,* and Sets containing big Integers\n"
 			+ "Set Interpreter REQUIRES you to omit spaces in identifiers\n"
-			+"However, you can use spaces and run the program with '--omit-spaces' to bypass this.\n\n"
 			+"Allowed statements:\n?<Set/Factor> to output a set or factor\n"
 			+"<Identifier>=<Set/Factor> to assign a Set to an Identifier.\n\n"
 			+ "Set Interpreter by Kostas Moumtzakis & Ruben van der Ham";
@@ -20,7 +19,11 @@ public class Main {
 		out = new PrintStream(System.out);
 		setCollection = new HashMap<>();
 	}
-
+	/**
+	 * Method for clarifying the type of statement
+	 * @param input from user
+	 * @throws APException if incorrect input is detected
+	 */
 	private void parseStatement(String input) throws APException {
 		Scanner statement = format(input);
 
@@ -32,12 +35,18 @@ public class Main {
 			throw new APException("Invalid statement, please read the documentation");
 		}
 	}
-
+	/**
+	 * Method for checking the validity of the inputed line
+	 * @param line of input (statement)
+	 * @return formatted Scanner object
+	 * @throws APException if incorrect input is detected
+	 */
 	private Scanner format(String line) throws APException {
 		Scanner input = new Scanner(line);
 		StringBuilder statement = new StringBuilder();
 
 		while (input.hasNext()) {
+			
 			if (nextCharIs(input, '/')) {
 				statement.append(input.nextLine());
 				return new Scanner(statement.toString());
@@ -45,49 +54,41 @@ public class Main {
 				statement.append(input.next());
 				while (nextCharIs(input, ' ')) {
 					skipToken(input.next(), ' ');
+					
 					if (nextCharIsLetter(input) || nextCharIsDigit(input)) {
-						throw new APException("Space in Identifier not allowed");
-					}
-				}
-			} else if (nextCharIs(input, '{')) {
-				statement.append(input.next());
-				while (nextCharIs(input, ' ')) {
-					skipToken(input.next(), ' ');
-				}
-				if (!(nextCharIs(input, '}') || nextCharIsDigit(input))) {
-					throw new APException("Invalid Set, please read the documentation");
-				}
-				if (nextCharIs(input, '0')) {
-					statement.append(input.next());
-					if (nextCharIsDigit(input)) {
-						throw new APException("Invalid Set, please read the documentation");
+						throw new APException("Spaces in Identifier and between numbers not allowed");
 					}
 				}
 			} else if (nextCharIs(input, ' ')) {
 				skipToken(input.next(), ' ');
-			} else if (nextCharIsDigit(input)) {
-				statement.append(input.next());
-				while (nextCharIs(input, ' ')) {
-					skipToken(input.next(), ' ');
-					if (nextCharIsDigit(input)) {
-						throw new APException("Invalid Set, please read the documentation");
-					}
-				}
-			} else if (nextCharIs(input, ',')) {
-				statement.append(input.next());
-				while (nextCharIs(input, ' ')) {
-					skipToken(input.next(), ' ');
-				}
-				if (!nextCharIsDigit(input)) {
-					throw new APException("Missing number in set");
-				}
 			} else {
 				statement.append(input.next());
 			}
 		}
+		String formated = statement.toString();
+		for (int i = 0; i < formated.length(); i++) {
+			if (formated.charAt(i) == ',') {
+				
+				try {
+					if (!Character.isDigit(formated.charAt(i - 1)) || !Character.isDigit(formated.charAt(i + 1))) {
+						throw new APException("Missing number in set");
+					}
+				} catch (Exception e) {
+					throw new APException("Missing number in set");
+				}
+			} else if (formated.charAt(i) == '0') {
+				if (!Character.isDigit(formated.charAt(i - 1)) && Character.isDigit(formated.charAt(i + 1))) {
+					throw new APException("Invalid number");
+				}
+			}
+		}
 		return new Scanner(statement.toString());
 	}
-
+	/**
+	 * Method for parsing the inputed assignment
+	 * @param input from user
+	 * @throws APException if incorrect input is detected
+	 */
 	private void parseAssignment(Scanner input) throws APException {
 		SetInterface<BigInteger> set;
 		input.useDelimiter("=");
@@ -99,13 +100,21 @@ public class Main {
 		}
 		setCollection.put(identifier, set);
 	}
-
+	/**
+	 * Method that prints the requested set
+	 * @param input from user
+	 * @throws APException if incorrect input is detected
+	 */
 	private void printStatement(Scanner input) throws APException {
 		skipToken(input.next(), '?');
 		SetInterface<BigInteger> set = parseExpression(input);
 		out.println(SetToString(set));
 	}
-
+	/**
+	 * Method that returns a set in a string format
+	 * @param set
+	 * @return The set values seperated by spaces in String object
+	 */
 	private String SetToString(SetInterface<BigInteger> set){
 		StringBuilder output = new StringBuilder();
 
@@ -118,7 +127,12 @@ public class Main {
 		}
 		return output.toString();
 	}
-
+	/**
+	 * Method that validates and returns a Identifier from a string
+	 * @param input string
+	 * @return Identifier Object
+	 * @throws APException if incorrect input is detected
+	 */
 	private IdentifierInterface parseIdentifier(String input) throws APException {
 		IdentifierInterface result = new Identifier();
 
@@ -130,7 +144,12 @@ public class Main {
 
 		return result;
 	}
-
+	/**
+	 * Method for calculating the set out of an expression
+	 * @param expression
+	 * @return the result set of the expression
+	 * @throws APException if incorrect input is detected
+	 */
 	private SetInterface<BigInteger> parseExpression(Scanner expression) throws APException {
 		SetInterface<BigInteger> result = null;
 		StringBuilder term = new StringBuilder();
@@ -144,8 +163,8 @@ public class Main {
 			} else if (nextCharIs(expression, ')')) {
 				openComplexFactors -= 1;
 				term.append(expression.next());
-			} else if (nextCharIs(expression, '+') && openComplexFactors == 0) {
-				skipToken(expression.next(), '+');
+			} else if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+				String operator = expression.next();
 
 				if (result == null) {
 					result = parseTerm(new Scanner(term.toString()));
@@ -155,8 +174,21 @@ public class Main {
 				while (expression.hasNext()) {
 
 					if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
-						result = result.union(parseTerm(new Scanner(term.toString())));
-						term.setLength(0);
+						
+						switch (operator) {
+							case "+":
+								result = result.union(parseTerm(new Scanner(term.toString())));
+								term.setLength(0);
+								break;
+							case "-":
+								result = result.complement(parseTerm(new Scanner(term.toString())));
+								term.setLength(0);
+								break;
+							case "|":
+								result = result.symDifference(parseTerm(new Scanner(term.toString())));
+								term.setLength(0);
+								break;
+						}
 						break;
 					} else if (nextCharIs(expression, '(')) {
 						openComplexFactors +=1;
@@ -170,61 +202,21 @@ public class Main {
 				}
 
 				if (term != null) {
-					result = result.union(parseTerm(new Scanner(term.toString())));
-				}
-			} else if (nextCharIs(expression, '|') && openComplexFactors == 0) {
-				skipToken(expression.next(), '|');
-
-				if (result == null) {
-					result = parseTerm(new Scanner(term.toString()));
-				}
-				term.setLength(0);
-
-				while (expression.hasNext()) {
-
-					if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
-						result = result.symDifference(parseTerm(new Scanner(term.toString())));
-						term.setLength(0);
-						break;
-					} else if (nextCharIs(expression, '(')) {
-						openComplexFactors +=1;
-						term.append(expression.next());
-					} else if (nextCharIs(expression, ')')) {
-						openComplexFactors -=1;
-						term.append(expression.next());
-					} else {
-						term.append(expression.next());
+					
+					switch (operator) {
+						case "+":
+							result = result.union(parseTerm(new Scanner(term.toString())));
+							term.setLength(0);
+							break;
+						case "-":
+							result = result.complement(parseTerm(new Scanner(term.toString())));
+							term.setLength(0);
+							break;
+						case "|":
+							result = result.symDifference(parseTerm(new Scanner(term.toString())));
+							term.setLength(0);
+							break;
 					}
-				}
-				if (result != null) {
-					result = result.symDifference(parseTerm(new Scanner(term.toString())));
-				}
-			} else if (nextCharIs(expression, '-') && openComplexFactors == 0) {
-				skipToken(expression.next(), '-');
-
-				if (result == null) {
-					result = parseTerm(new Scanner(term.toString()));
-				}
-				term.setLength(0);
-
-				while (expression.hasNext()) {
-
-					if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
-						result = result.complement(parseTerm(new Scanner(term.toString())));
-						term.setLength(0);
-						break;
-					} else if (nextCharIs(expression, '(')) {
-						openComplexFactors +=1;
-						term.append(expression.next());
-					} else if (nextCharIs(expression, ')')) {
-						openComplexFactors -=1;
-						term.append(expression.next());
-					} else {
-						term.append(expression.next());
-					}
-				}
-				if (result != null) {
-					result = result.complement(parseTerm(new Scanner(term.toString())));
 				}
 			} else {
 				term.append(expression.next());
@@ -237,7 +229,12 @@ public class Main {
 
 		return result;
 	}
-
+	/**
+	 * Method that validates and calculates a term
+	 * @param term
+	 * @return the set resulted from the term
+	 * @throws APException if incorrect input is detected
+	 */
 	private SetInterface<BigInteger> parseTerm(Scanner term) throws APException {
 		SetInterface<BigInteger> result;
 		StringBuilder factor = new StringBuilder();
@@ -262,7 +259,12 @@ public class Main {
 		result = parseFactor(new Scanner(factor.toString()));
 		return result;
 	}
-
+	/**
+	 * Method that validates and calculates a factor
+	 * @param factor
+	 * @return the set resulted from the factor
+	 * @throws APException if incorrect input is detected
+	 */
 	private SetInterface<BigInteger> parseFactor(Scanner factor) throws APException {
 		SetInterface<BigInteger> result = new Set<>();
 		int openComplexFactors = 0;
@@ -339,7 +341,12 @@ public class Main {
 
 		return result;
 	}
-
+	/**
+	 * Method that validates and calculates a set
+	 * @param factor
+	 * @return the set resulted from a string of numbers
+	 * @throws APException if incorrect input is detected
+	 */
 	private SetInterface<BigInteger> parseSet(String numbers) throws APException {
 		SetInterface<BigInteger> result = new Set<>();
 		Scanner parser = new Scanner(numbers);
@@ -400,7 +407,7 @@ public class Main {
 			if (argv[0].equals("--help")) {
 				System.out.println(HELP_MESSAGE);
 			}
-		}catch (Exception e){
+		} catch (Exception e){
 			new Main().start();
 		}
 		new Main().start();
