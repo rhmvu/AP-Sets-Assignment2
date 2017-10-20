@@ -5,19 +5,7 @@ import java.math.BigInteger;
 import java.util.regex.Pattern;
 
 public class Main {
-    static final String IDENTIFIER_FORMAT_EXCEPTION = "Space in Identifier not allowed",
-            IDENTIFIER_BLANK_EXCEPTION = "An Identifier has to have a name",
-            INVALID_STATEMENT = "Invalid statement, please read the documentation",
-            IDENTIFIER_NOT_FOUND = ", parsed as identifier has no corresponding Set",
-            DOUBLE_VALUE_SET = "Invalid Set: Set contains 2 elements with the same value",
-            HELP_MESSAGE = "This Set interpreter works with operators +,-,* and Sets containing big Integers\n"
-                    + "Set Interpreter REQUIRES you to omit spaces in identifiers\n"
-                    +"However, you can use spaces and run the program with '--omit-spaces' to bypass this.\n\n"
-                    +"Allowed statements:\n?<Set/Factor> to output a set or factor\n"
-                    +"<Identifier>=<Set/Factor> to assign a Set to an Identifier.\n\n"
-                    + "Set Interpreter by Kostas Moumtzakis & Ruben van der Ham";
 
-    
     PrintStream out;
     HashMap<IdentifierInterface, SetInterface<BigInteger>> setCollection;
 
@@ -34,7 +22,7 @@ public class Main {
     	} else if (nextCharIs(statement, '?')) {
     		printStatement(statement);
     	} else if (! nextCharIs(statement, '/')){
-    		throw new APException(INVALID_STATEMENT);
+    		throw new APException("Invalid statement, please read the documentation");
     	}
     }
     
@@ -65,7 +53,7 @@ public class Main {
     			if (nextCharIs(input, '0')) {
         			statement.append(input.next());
     				if (nextCharIsDigit(input)) {
-    					throw new APException("invalid set");
+    					throw new APException("Invalid number");
     				}
     			}
     		} else if (nextCharIs(input, ' ')) {
@@ -75,7 +63,7 @@ public class Main {
     			while (nextCharIs(input, ' ')) {
     				skipToken(input.next(), ' ');
     				if (nextCharIsDigit(input)) {
-    					throw new APException("invalid set");
+    					throw new APException("Invalid number");
     				}
     			}
     		} else if (nextCharIs(input, ',')) {
@@ -84,7 +72,7 @@ public class Main {
     				skipToken(input.next(), ' ');
     			}
 				if (!nextCharIsDigit(input)) {
-					throw new APException("invalid set");
+					throw new APException("Missing number");
 				}
     		} else {
     			statement.append(input.next());
@@ -101,7 +89,7 @@ public class Main {
     	try {
         	set = parseExpression(new Scanner(input.next()));
     	} catch (Exception e) {
-    		throw new APException(INVALID_STATEMENT);
+    		throw new APException("Invalid statement, please read the documentation");
     	}
     	setCollection.put(identifier, set);
     }
@@ -394,10 +382,8 @@ public class Main {
     
     private void start() {
         Scanner in = new Scanner(System.in);
-        Scanner statement;
 
         while(in.hasNextLine()) {
-			//statement = new Scanner(in.nextLine().replaceAll(" ", ""));
 
 			try {
 				parseStatement(in.nextLine());

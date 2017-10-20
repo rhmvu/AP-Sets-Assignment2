@@ -88,19 +88,15 @@ public class List<E extends Comparable> implements ListInterface<E>{
             current = current.prior;
             current.next = current.next.prior = null;
             tail = current;
-        } else {
-            if (current.prior == null) { // current == head
-                current = current.next;
-                current.prior = current.prior.next = null;
-                head = current;
-            } else {
-                if (current.prior != null && current.next != null) { //current is in the middle of 2 nodes
-                    Node temp = current.next;
-                    current.prior.next = current.next;
-                    current.next.prior = current.prior;
-                    current = temp;
-                }
-            }
+        } else if (current.prior == null) { // current == head
+            current = current.next;
+            current.prior = current.prior.next = null;
+            head = current;
+        } else if (current.prior != null && current.next != null) { //current is in the middle of 2 nodes
+            Node temp = current.next;
+            current.prior.next = current.next;
+            current.next.prior = current.prior;
+            current = temp;
         }
         numberOfElements -= 1;
         return this;
@@ -173,7 +169,7 @@ public class List<E extends Comparable> implements ListInterface<E>{
     }
 
     @Override
-    public ListInterface<E> copy() { //Doesn't create a deep copy yet?
+    public ListInterface<E> copy() {
         Node oldCurrent = current;
         List<E> temp = new List<E>();
         if (this.isEmpty()){
@@ -190,10 +186,6 @@ public class List<E extends Comparable> implements ListInterface<E>{
         current = oldCurrent;
         return temp;
     }
-    
-    /*void deleteDataInCurrent(){ //used for CopyTest
-    	current.data = null;
-    }*/
 }
 
 
