@@ -174,21 +174,8 @@ public class Main {
 				while (expression.hasNext()) {
 
 					if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
-						
-						switch (operator) {
-							case "+":
-								result = result.union(parseTerm(new Scanner(term.toString())));
-								term.setLength(0);
-								break;
-							case "-":
-								result = result.complement(parseTerm(new Scanner(term.toString())));
-								term.setLength(0);
-								break;
-							case "|":
-								result = result.symDifference(parseTerm(new Scanner(term.toString())));
-								term.setLength(0);
-								break;
-						}
+						result = operation(result, parseTerm(new Scanner(term.toString())), operator);
+						term.setLength(0);
 						break;
 					} else if (nextCharIs(expression, '(')) {
 						openComplexFactors +=1;
@@ -202,21 +189,7 @@ public class Main {
 				}
 
 				if (term != null) {
-					
-					switch (operator) {
-						case "+":
-							result = result.union(parseTerm(new Scanner(term.toString())));
-							term.setLength(0);
-							break;
-						case "-":
-							result = result.complement(parseTerm(new Scanner(term.toString())));
-							term.setLength(0);
-							break;
-						case "|":
-							result = result.symDifference(parseTerm(new Scanner(term.toString())));
-							term.setLength(0);
-							break;
-					}
+					result = operation(result, parseTerm(new Scanner(term.toString())), operator);
 				}
 			} else {
 				term.append(expression.next());
@@ -227,6 +200,22 @@ public class Main {
 			result = parseTerm(new Scanner(term.toString()));
 		}
 
+		return result;
+	}
+	
+	private SetInterface<BigInteger> operation(SetInterface<BigInteger> operhand1, SetInterface<BigInteger> operhand2, String operator) {
+		SetInterface<BigInteger> result = new Set<>();
+		switch (operator) {
+		case "+":
+			result = operhand1.union(operhand2);
+			break;
+		case "-":
+			result = operhand1.complement(operhand2);
+			break;
+		case "|":
+			result = operhand1.symDifference(operhand2);
+			break;
+	}
 		return result;
 	}
 	/**
