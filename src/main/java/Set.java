@@ -21,14 +21,16 @@ public class Set<E extends Comparable> implements SetInterface<E>{
             return result;
         }
         this.set.goToFirst();
-        do{
-            //System.out.println("result =  " + result.toString());
-            if(!result.contains(this.set.retrieve())){
-                //System.out.println("inserting: " + this.set.retrieve());
-                result.insert(this.set.retrieve());
-            }
-        }while(this.set.goToNext());
-
+        
+        if (!result.contains(this.set.retrieve())){
+            result.insert(this.set.retrieve());
+        }
+        
+        while (this.set.goToNext()) {
+	        if (!result.contains(this.set.retrieve())){
+	            result.insert(this.set.retrieve());
+	        }
+        }
         return result;
     }
 
@@ -36,16 +38,19 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     public SetInterface<E> intersection(SetInterface<E> toIntersect){
         SetInterface<E> result = new Set<E>();
         if (this.isEmpty() || set.isEmpty()) {
-        	//System.out.println("result " + result.toString());
         	return result;
         }
         this.set.goToFirst();
-        do{
-            if(toIntersect.contains(this.set.retrieve())){
+        
+        if (toIntersect.contains(this.set.retrieve())){
+            result.insert(this.set.retrieve());
+        }
+        
+        while (this.set.goToNext()) {
+        	if (toIntersect.contains(this.set.retrieve())){
                 result.insert(this.set.retrieve());
             }
-        }while(this.set.goToNext());
-    	//System.out.println("result " + result.toString());
+        }
         return result;
     }
     @Override
@@ -56,15 +61,16 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         	return result;
         }
         this.set.goToFirst();
-        do{
-            //System.out.printf("result = %s\n",result.toString());
-            //System.out.printf("set2= %s\n",toComplement.toString());
-
-            if(toComplement.contains(this.set.retrieve())){
-                //System.out.printf("contains = %d\n",this.set.retrieve());
+        
+        if (toComplement.contains(this.set.retrieve())){
+            result.remove(this.set.retrieve());
+        }
+        
+        while (this.set.goToNext()) {
+        	if(toComplement.contains(this.set.retrieve())){
                 result.remove(this.set.retrieve());
             }
-        }while(this.set.goToNext());
+        }
         return result;
     }
     @Override
@@ -97,10 +103,8 @@ public class Set<E extends Comparable> implements SetInterface<E>{
 
     @Override
     public SetInterface<E> remove(E d){
-        if(set.find(d)) {
+        if (set.find(d)) {
             set.remove();
-            //System.out.printf("Set removed\n");
-            //System.out.printf("Set Size = %d",this.size());
         }
         return this;
     }
@@ -115,33 +119,51 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     @Override
     public boolean hasDoubleOccurencies(){
         set.goToFirst();
-        if(isEmpty()){
+        if (isEmpty()){
             return false;
         }
-        do{
-            E value = set.retrieve();
+        E value = set.retrieve();
+        set.remove();
+        
+        if (set.find(value)){
+            set.insert(value);
+            return true;
+        }
+        set.insert(value);
+            
+        while (this.set.goToNext()) {
+        	value = set.retrieve();
             set.remove();
-            if(set.find(value)){
+            
+            if (set.find(value)){
                 set.insert(value);
                 return true;
             }
             set.insert(value);
-        }while(this.set.goToNext());
+        }
         return false;
     }
     @Override
     public SetInterface<E> fixDoubleOccurencies(){
         set.goToFirst();
-        if(isEmpty()){
+        
+        if (isEmpty()){
             return this;
         }
-        do{
-            E value = set.retrieve();
+        E value = set.retrieve();
+        remove((E) value);
+        if (!set.find(value)){
+            set.insert(value);
+        }
+        
+        while (this.set.goToNext()) {
+        	value = set.retrieve();
             remove((E) value);
-            if(!set.find(value)){
+            
+            if (!set.find(value)){
                 set.insert(value);
             }
-        }while(this.set.goToNext());
+        }
         return this;
     }
 
@@ -152,7 +174,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
             result = set.retrieve().toString();
         }
         while (set.goToNext()){
-            result += " " +set.retrieve().toString(); //Only works if this works too...
+            result += " " +set.retrieve().toString();
         }
         return result;
     }

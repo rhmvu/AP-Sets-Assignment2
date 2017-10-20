@@ -30,7 +30,7 @@ public class List<E extends Comparable> implements ListInterface<E>{
 
     @Override
     public boolean isEmpty() {
-        if(head == null){
+        if (head == null){
             return true;
         }
         return false;
@@ -54,8 +54,8 @@ public class List<E extends Comparable> implements ListInterface<E>{
     public ListInterface<E> insert(E d) {
         if (isEmpty()){
             current = tail = head = new Node(d);
-
         } else {
+        	
             if (tail.data.compareTo(d)<=0) {
                 Node tailNode = new Node(d, tail, null);
                 current = tail = tail.next = tailNode;
@@ -88,19 +88,15 @@ public class List<E extends Comparable> implements ListInterface<E>{
             current = current.prior;
             current.next = current.next.prior = null;
             tail = current;
-        } else {
-            if (current.prior == null) { // current == head
-                current = current.next;
-                current.prior = current.prior.next = null;
-                head = current;
-            } else {
-                if (current.prior != null && current.next != null) { //current is in the middle of 2 nodes
-                    Node temp = current.next;
-                    current.prior.next = current.next;
-                    current.next.prior = current.prior;
-                    current = temp;
-                }
-            }
+        } else if (current.prior == null) { // current == head
+            current = current.next;
+            current.prior = current.prior.next = null;
+            head = current;
+        } else if (current.prior != null && current.next != null) { //current is in the middle of 2 nodes
+            Node temp = current.next;
+            current.prior.next = current.next;
+            current.next.prior = current.prior;
+            current = temp;
         }
         numberOfElements -= 1;
         return this;
@@ -109,20 +105,25 @@ public class List<E extends Comparable> implements ListInterface<E>{
 
     @Override
     public boolean find(E d) {
-        if(isEmpty()){
+        if (isEmpty()){
             return false;
         }
         goToFirst();
-        do{
-            if (current.data.hashCode() == d.hashCode() || current.data == d) {
+        
+        if (current.data.hashCode() == d.hashCode() || current.data == d) {
+            return true;
+        }
+        
+        while (goToNext()) {
+        	if (current.data.hashCode() == d.hashCode() || current.data == d) {
                 return true;
             }
-        }while(goToNext());
+        }
         current = head;
-        if(head.data.compareTo(d) > 0){
-        } else {
+        
+        if (!(head.data.compareTo(d) > 0)){
             while (current.data.compareTo(d)< 0) {
-                if(current.next == null){
+                if (current.next == null){
                     return false;
                 }
                 current = current.next;
@@ -136,7 +137,7 @@ public class List<E extends Comparable> implements ListInterface<E>{
     public boolean goToFirst() {
         if (isEmpty()) {
             return false;
-        }else {
+        } else {
             current = head;
             return true;
         }
@@ -146,7 +147,7 @@ public class List<E extends Comparable> implements ListInterface<E>{
     public boolean goToLast() {
         if (isEmpty()) {
             return false;
-        }else {
+        } else {
             current = tail;
             return true;
         }
@@ -156,7 +157,7 @@ public class List<E extends Comparable> implements ListInterface<E>{
     public boolean goToNext() {
         if (isEmpty() || current.next == null) {
             return false;
-        }else {
+        } else {
             current = current.next;
             return true;
         }
@@ -166,22 +167,24 @@ public class List<E extends Comparable> implements ListInterface<E>{
     public boolean goToPrevious() {
         if (isEmpty() || current.prior == null) {
             return false;
-        }else {
+        } else {
             current = current.prior;
             return true;
         }
     }
 
     @Override
-    public ListInterface<E> copy() { //Doesn't create a deep copy yet?
+    public ListInterface<E> copy() {
         Node oldCurrent = current;
         List<E> temp = new List<E>();
+        
         if (this.isEmpty()){
             return temp.init();
         }
         this.goToLast();
         temp.insert(this.retrieve());
         temp.tail = temp.current;
+        
         while (current.prior != null){
             this.current = current.prior;
             temp.insert(this.retrieve());
@@ -190,10 +193,6 @@ public class List<E extends Comparable> implements ListInterface<E>{
         current = oldCurrent;
         return temp;
     }
-    
-    /*void deleteDataInCurrent(){ //used for CopyTest
-    	current.data = null;
-    }*/
 }
 
 
