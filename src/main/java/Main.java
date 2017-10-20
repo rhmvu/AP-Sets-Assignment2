@@ -5,11 +5,15 @@ import java.math.BigInteger;
 import java.util.regex.Pattern;
 
 public class Main {
-    static final String IDENTIFIER_FORMAT_EXCEPTION = "Space in Identifier not allowed",
-            IDENTIFIER_BLANK_EXCEPTION = "An Identifier has to have a name",
-            INVALID_STATEMENT = "Invalid statement, please read the documentation",
-            IDENTIFIER_NOT_FOUND = ", parsed as identifier has no corresponding Set",
-            DOUBLE_VALUE_SET = "Invalid Set: Set contains 2 elements with the same value",
+    static final private String IDENTIFIER_SPACE_EXCEPTION = "Space in Identifier not allowed",
+			IDENTIFIER_FORMAT_EXCEPTION = "Invalid identifier, please read the documentation",
+			IDENTIFIER_NOT_FOUND_EXCEPTION = ", parsed as identifier has no corresponding Set",
+            INVALID_SET_EXCEPTION = "Invalid Set, please read the documentation",
+			SET_MISSING_NUMBER_EXCEPTION = "Invalid Set, number missing between \\\"\\{\\,\\\"",
+			SET_INVALID_TOKEN_EXCEPTION = "Invalid token in set, please read the documentation",
+			MISSING_OPERATOR_EOL_EXCEPTION = "Operator or end of line missing, please read the documentation",
+            INVALID_STATEMENT_EXCEPTION = "Invalid statement, please read the documentation",
+           // DOUBLE_VALUE_SET = "Invalid Set: Set contains 2 elements with the same value",
             HELP_MESSAGE = "This Set interpreter works with operators +,-,* and Sets containing big Integers\n"
                     + "Set Interpreter REQUIRES you to omit spaces in identifiers\n"
                     +"However, you can use spaces and run the program with '--omit-spaces' to bypass this.\n\n"
@@ -23,7 +27,7 @@ public class Main {
 
     Main(){
         out = new PrintStream(System.out);
-        setCollection = new HashMap<IdentifierInterface, SetInterface<BigInteger>>();
+        setCollection = new HashMap<>();
     }
     
     public void parseStatement(String input) throws APException {
@@ -34,7 +38,7 @@ public class Main {
     	} else if (nextCharIs(statement, '?')) {
     		printStatement(statement);
     	} else if (! nextCharIs(statement, '/')){
-    		throw new APException(INVALID_STATEMENT);
+    		throw new APException(INVALID_STATEMENT_EXCEPTION);
     	}
     }
     
@@ -51,7 +55,7 @@ public class Main {
     			while (nextCharIs(input, ' ')) {
     				skipToken(input.next(), ' ');
     				if (nextCharIsLetter(input) || nextCharIsDigit(input)) {
-    					throw new APException("invalid Identifier");
+    					throw new APException(IDENTIFIER_SPACE_EXCEPTION);
     				}
     			}
     		} else if (nextCharIs(input, '{')) {
@@ -60,12 +64,12 @@ public class Main {
     				skipToken(input.next(), ' ');
 				}
     			if (!(nextCharIs(input, '}') || nextCharIsDigit(input))) {
-    				throw new APException("Invalid set");
+    				throw new APException(INVALID_SET_EXCEPTION);
     			}
     			if (nextCharIs(input, '0')) {
         			statement.append(input.next());
     				if (nextCharIsDigit(input)) {
-    					throw new APException("invalid set");
+    					throw new APException(INVALID_SET_EXCEPTION);
     				}
     			}
     		} else if (nextCharIs(input, ' ')) {
@@ -75,7 +79,7 @@ public class Main {
     			while (nextCharIs(input, ' ')) {
     				skipToken(input.next(), ' ');
     				if (nextCharIsDigit(input)) {
-    					throw new APException("invalid set");
+    					throw new APException(INVALID_SET_EXCEPTION);
     				}
     			}
     		} else if (nextCharIs(input, ',')) {
@@ -84,7 +88,7 @@ public class Main {
     				skipToken(input.next(), ' ');
     			}
 				if (!nextCharIsDigit(input)) {
-					throw new APException("invalid set");
+					throw new APException(INVALID_SET_EXCEPTION);
 				}
     		} else {
     			statement.append(input.next());
@@ -95,13 +99,13 @@ public class Main {
     }
     
     public void parseAssignment(Scanner input) throws APException {
-    	SetInterface<BigInteger> set = new Set<BigInteger>();
-    	input.useDelimiter("\\=");
+    	SetInterface<BigInteger> set;
+    	input.useDelimiter("=");
     	IdentifierInterface identifier = parseIdentifier(input.next());
     	try {
         	set = parseExpression(new Scanner(input.next()));
     	} catch (Exception e) {
-    		throw new APException(INVALID_STATEMENT);
+    		throw new APException(INVALID_STATEMENT_EXCEPTION);
     	}
     	setCollection.put(identifier, set);
     }
@@ -131,15 +135,14 @@ public class Main {
     	if(result.hasCorrectIdentifierFormat(input)) {
     		result.appendIdentifier(input);
         } else {
-            throw new APException("Identifier has not valid format");
+            throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
         }
     	
         return result;
     }
     
     public SetInterface<BigInteger> parseExpression(Scanner expression) throws APException {
-    	SetInterface<BigInteger> result = new Set<BigInteger>();
-    	result = null;
+    	SetInterface<BigInteger> result = null;
     	StringBuilder term = new StringBuilder();
     	int openComplexFactors = 0;
 
@@ -240,7 +243,6 @@ public class Main {
     	}
     	
     	if (result == null) {
-    		//System.out.printf("TERM =%s\n",term.toString());
     		result = parseTerm(new Scanner(term.toString()));
     	}
     	
@@ -248,7 +250,7 @@ public class Main {
     }
     
     public SetInterface<BigInteger> parseTerm(Scanner term) throws APException {
-    	SetInterface<BigInteger> result = new Set<BigInteger>();
+    	SetInterface<BigInteger> result;
     	StringBuilder factor = new StringBuilder();
     	int openComplexFactors = 0;
     	
@@ -268,14 +270,12 @@ public class Main {
     			factor.append(term.next());
         	}
     	}
-		//System.out.printf("FACTOR in term =%s\n",factor.toString());
 		result = parseFactor(new Scanner(factor.toString()));
-    	
     	return result;
     }
     
     public SetInterface<BigInteger> parseFactor(Scanner factor) throws APException {
-    	SetInterface<BigInteger> result = new Set<BigInteger>();
+    	SetInterface<BigInteger> result = new Set<>();
     	int openComplexFactors = 0;
 		StringBuilder set = new StringBuilder();
     	
@@ -312,19 +312,18 @@ public class Main {
 	    		while (nextCharIsLetter(factor)|| nextCharIsDigit(factor)) {
 	    			set.append(factor.next());
 	    		}
-				//System.out.printf("Read id in factor =%s",set.toString());
 	    		IdentifierInterface identifier = parseIdentifier(set.toString());
 	        	
     			if (setCollection.containsKey(identifier)) {
     				result = setCollection.get(identifier);
     			} else {
-    				throw new APException("Identifier does not correspond to a Set");
+    				throw new APException(identifier.toString()+IDENTIFIER_NOT_FOUND_EXCEPTION);
     			}
 	    	} else if (nextCharIs(factor, '{')) {
 	    		skipToken(factor.next(), '{');
 	    		
 	    		if (nextCharIs(factor, ',')) {
-	    			throw new APException("Number missing");
+	    			throw new APException(SET_MISSING_NUMBER_EXCEPTION);
 	    		}
     			
 	    		while (!nextCharIs(factor, '}') && factor.hasNext()) {
@@ -334,11 +333,11 @@ public class Main {
 	    		if (factor.hasNext()) {
 	    			skipToken(factor.next(), '}');
 	    		} else {
-	    			throw new APException("Invalid token detected");
+	    			throw new APException(SET_INVALID_TOKEN_EXCEPTION);
 	    		}
 	    		
 	    		if (factor.hasNext()) {
-	    			throw new APException("Operator missing / No end of line");
+	    			throw new APException(MISSING_OPERATOR_EOL_EXCEPTION);
 	    		}
 	    		result = parseSet(set.toString());
 	    	} else {
@@ -396,11 +395,7 @@ public class Main {
     
     private void start() {
         Scanner in = new Scanner(System.in);
-        Scanner statement;
-
         while(in.hasNextLine()) {
-			//statement = new Scanner(in.nextLine().replaceAll(" ", ""));
-
 			try {
 				parseStatement(in.nextLine());
 			} catch (APException e) {
@@ -411,6 +406,13 @@ public class Main {
     }
 
     public static void main(String[] argv) {
+    	try {
+			if (argv[0].equals("--help")) {
+				System.out.println(HELP_MESSAGE);
+			}
+		}catch (Exception e){
+    		new Main().start();
+		}
             new Main().start();
     }
 }
