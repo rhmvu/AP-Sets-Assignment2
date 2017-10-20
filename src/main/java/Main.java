@@ -79,6 +79,14 @@ public class Main {
     		}
     	}
     	
+    	for (int i = 0; i < statement.length(); i++) {
+    		if (statement.charAt(i) == ',') {
+    			if (!Character.isDigit(statement.charAt(i - 1)) || !Character.isDigit(statement.charAt(i + 1))) {
+    				throw new APException("Missing number");
+    			}
+    		}
+    	}
+    	
     	return new Scanner(statement.toString());
     }
     
