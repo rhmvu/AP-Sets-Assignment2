@@ -240,6 +240,7 @@ public class Main {
     	}
     	
     	if (result == null) {
+    		//System.out.printf("TERM =%s\n",term.toString());
     		result = parseTerm(new Scanner(term.toString()));
     	}
     	
@@ -267,6 +268,7 @@ public class Main {
     			factor.append(term.next());
         	}
     	}
+		//System.out.printf("FACTOR in term =%s\n",factor.toString());
 		result = parseFactor(new Scanner(factor.toString()));
     	
     	return result;
@@ -305,12 +307,12 @@ public class Main {
     			}
 				result = parseExpression(new Scanner(set.toString()));
     		} else if (nextCharIsLetter(factor)) {
-	    		
     			set.append(factor.next());
 	    		
-	    		while (nextCharIsLetter(factor)) {
+	    		while (nextCharIsLetter(factor)|| nextCharIsDigit(factor)) {
 	    			set.append(factor.next());
 	    		}
+				//System.out.printf("Read id in factor =%s",set.toString());
 	    		IdentifierInterface identifier = parseIdentifier(set.toString());
 	        	
     			if (setCollection.containsKey(identifier)) {
