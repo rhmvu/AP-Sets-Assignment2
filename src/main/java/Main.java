@@ -79,7 +79,7 @@ public class Main {
 		return new Scanner(statement.toString());
 	}
 	/**
-	 * Method for parsing the inputed assignment
+	 * Method for parsing the inputted assignment
 	 * @param input from user
 	 * @throws APException if incorrect input is detected
 	 */
@@ -108,7 +108,7 @@ public class Main {
 	/**
 	 * Method that returns a set in a string format
 	 * @param set
-	 * @return The set values seperated by spaces in String object
+	 * @return The set values separated by spaces in String object
 	 */
 	private String SetToString(SetInterface<BigInteger> set){
 		StringBuilder output = new StringBuilder();
