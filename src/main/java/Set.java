@@ -146,7 +146,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     @Override
     public SetInterface<E> fixDoubleOccurencies(){
         set.goToFirst();
-        
+
         if (isEmpty()){
             return this;
         }
@@ -155,11 +155,11 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         if (!set.find(value)){
             set.insert(value);
         }
-        
+
         while (this.set.goToNext()) {
         	value = set.retrieve();
             remove((E) value);
-            
+
             if (!set.find(value)){
                 set.insert(value);
             }
@@ -216,5 +216,4 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         }
         return false;
     }
-
 }

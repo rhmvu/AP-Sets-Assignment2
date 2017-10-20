@@ -13,27 +13,30 @@ public interface IdentifierInterface {
     /**	@precondition  -
      *	@postcondition - The Identifier is returned as a String.
      **/
-    public String toString();
+    String toString();
 
     /**	@precondition  -
      *	@postcondition - returned the hashcode of the Identifier.
      **/
-    public int hashCode();
+    int hashCode();
 
     /**	@precondition  -
      *	@postcondition - The Identifier is compared to the object in the parameter.
      *                      @success:   True is returned.
      *                      @failure    False is returned.
      **/
-    public boolean equals(Object toCompare);
+    boolean equals(Object toCompare);
 
+
+    /**	@precondition  - The String in the input does not disrupt the EBNF Identifier format.
+     *	@postcondition - The String in the input has been added to the Identifier.
+     **/
+    void appendIdentifier(String toAppend);
 
     /**	@precondition  -
      *	@postcondition -
-     *                     @success:	The String in the input has been added to the Identifier.
-     *                     @failure:    The String in the input was not conform the ENBF Identifier format, input not added.
+     *                     @success:	The String in the input was conform the ENBF Identifier format.
+     *                     @failure:    The String in the input was not conform the ENBF Identifier format.
      **/
-    public void appendIdentifier(String toAppend);
-    
-    public boolean hasCorrectIdentifierFormat(String input);
+    boolean hasCorrectIdentifierFormat(String input);
 }

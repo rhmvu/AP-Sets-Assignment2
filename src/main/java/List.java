@@ -5,7 +5,6 @@ public class List<E extends Comparable> implements ListInterface<E>{
             current,
             tail;
 
-
     List(){
         numberOfElements = 0;
     }
@@ -176,7 +175,7 @@ public class List<E extends Comparable> implements ListInterface<E>{
     @Override
     public ListInterface<E> copy() {
         Node oldCurrent = current;
-        List<E> temp = new List<E>();
+        List<E> temp = new List<>();
         
         if (this.isEmpty()){
             return temp.init();

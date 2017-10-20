@@ -106,7 +106,4 @@ public interface ListInterface<E extends Comparable> {
      * @postcondition A deep copy of the list has been returned.
      */
     ListInterface<E> copy();
-
-
-
 }

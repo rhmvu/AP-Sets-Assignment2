@@ -10,7 +10,6 @@
 public interface SetInterface<E extends Comparable> {
 
 
-
     /**	@precondition -
      *  @postcondition - The current Set has been initialized and returned as a SetInterface.
      **/
@@ -72,8 +71,8 @@ public interface SetInterface<E extends Comparable> {
     SetInterface<E> copy();
 
     /**	@precondition -
-     *  @postcondition - FALSE: current Set does NOT contain 2 elements with the same value;
-     *  				TRUE:  current Set does contain 2 elements with the same value;
+     *  @postcondition - FALSE: current Set does NOT contain multiple elements with the same value;
+     *  				TRUE:  current Set does contain multiple elements with the same value;
      **/
     boolean hasDoubleOccurencies();
 
