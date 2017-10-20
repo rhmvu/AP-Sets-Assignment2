@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public class Main {
 
-	static final String HELP_MESSAGE = "This Set interpreter works with operators +,-,* and Sets containing big Integers\n"
+	private static final String HELP_MESSAGE = "This Set interpreter works with operators +,-,* and Sets containing big Integers\n"
 			+ "Set Interpreter REQUIRES you to omit spaces in identifiers\n"
 			+"However, you can use spaces and run the program with '--omit-spaces' to bypass this.\n\n"
 			+"Allowed statements:\n?<Set/Factor> to output a set or factor\n"
@@ -21,7 +21,7 @@ public class Main {
 		setCollection = new HashMap<>();
 	}
 
-	public void parseStatement(String input) throws APException {
+	private void parseStatement(String input) throws APException {
 		Scanner statement = format(input);
 
 		if (nextCharIsLetter(statement)) {
@@ -88,7 +88,7 @@ public class Main {
 		return new Scanner(statement.toString());
 	}
 
-	public void parseAssignment(Scanner input) throws APException {
+	private void parseAssignment(Scanner input) throws APException {
 		SetInterface<BigInteger> set;
 		input.useDelimiter("=");
 		IdentifierInterface identifier = parseIdentifier(input.next());
@@ -100,7 +100,7 @@ public class Main {
 		setCollection.put(identifier, set);
 	}
 
-	public void printStatement(Scanner input) throws APException {
+	private void printStatement(Scanner input) throws APException {
 		skipToken(input.next(), '?');
 		SetInterface<BigInteger> set = parseExpression(input);
 		out.println(SetToString(set));
@@ -119,7 +119,7 @@ public class Main {
 		return output.toString();
 	}
 
-	public IdentifierInterface parseIdentifier(String input) throws APException {
+	private IdentifierInterface parseIdentifier(String input) throws APException {
 		IdentifierInterface result = new Identifier();
 
 		if(result.hasCorrectIdentifierFormat(input)) {
@@ -131,7 +131,7 @@ public class Main {
 		return result;
 	}
 
-	public SetInterface<BigInteger> parseExpression(Scanner expression) throws APException {
+	private SetInterface<BigInteger> parseExpression(Scanner expression) throws APException {
 		SetInterface<BigInteger> result = null;
 		StringBuilder term = new StringBuilder();
 		int openComplexFactors = 0;
@@ -238,7 +238,7 @@ public class Main {
 		return result;
 	}
 
-	public SetInterface<BigInteger> parseTerm(Scanner term) throws APException {
+	private SetInterface<BigInteger> parseTerm(Scanner term) throws APException {
 		SetInterface<BigInteger> result;
 		StringBuilder factor = new StringBuilder();
 		int openComplexFactors = 0;
@@ -263,7 +263,7 @@ public class Main {
 		return result;
 	}
 
-	public SetInterface<BigInteger> parseFactor(Scanner factor) throws APException {
+	private SetInterface<BigInteger> parseFactor(Scanner factor) throws APException {
 		SetInterface<BigInteger> result = new Set<>();
 		int openComplexFactors = 0;
 		StringBuilder set = new StringBuilder();
@@ -340,7 +340,7 @@ public class Main {
 		return result;
 	}
 
-	public SetInterface<BigInteger> parseSet(String numbers) throws APException {
+	private SetInterface<BigInteger> parseSet(String numbers) throws APException {
 		SetInterface<BigInteger> result = new Set<>();
 		Scanner parser = new Scanner(numbers);
 		parser.useDelimiter(",");
