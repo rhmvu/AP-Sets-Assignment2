@@ -26,24 +26,72 @@ public class Main {
         setCollection = new HashMap<IdentifierInterface, SetInterface<BigInteger>>();
     }
     
-    public void parseStatement(Scanner input) throws APException {
-    
-    	if (nextCharIs(input, '/')) { 
-    		// Do nothing
-    	} else if (nextCharIsLetter(input)) {
-            parseAssignment(input);
-    	} else if (nextCharIs(input, '?')) {
-    		printStatement(input);
-    	} else {
+    public void parseStatement(String input) throws APException {
+    	Scanner statement = format(input);
+    	
+    	if (nextCharIsLetter(statement)) {
+            parseAssignment(statement);
+    	} else if (nextCharIs(statement, '?')) {
+    		printStatement(statement);
+    	} else if (! nextCharIs(statement, '/')){
     		throw new APException(INVALID_STATEMENT);
     	}
-    	//eol(input);
     }
     
-    private void eol(Scanner input) throws APException {
-    	if (input.hasNext()) {
-    		throw new APException("no end of line");
+    private Scanner format(String line) throws APException {
+    	Scanner input = new Scanner(line);
+    	StringBuilder statement = new StringBuilder();
+    	
+    	while (input.hasNext()) {
+    		if (nextCharIs(input, '/')) {
+    			statement.append(input.nextLine());
+        		return new Scanner(statement.toString());
+        	} else if (nextCharIsLetter(input) || nextCharIsDigit(input)) {
+    			statement.append(input.next());
+    			while (nextCharIs(input, ' ')) {
+    				skipToken(input.next(), ' ');
+    				if (nextCharIsLetter(input) || nextCharIsDigit(input)) {
+    					throw new APException("invalid Identifier");
+    				}
+    			}
+    		} else if (nextCharIs(input, '{')) {
+    			statement.append(input.next());
+    			while (nextCharIs(input, ' ')) {
+    				skipToken(input.next(), ' ');
+				}
+    			if (!(nextCharIs(input, '}') || nextCharIsDigit(input))) {
+    				throw new APException("Invalid set");
+    			}
+    			if (nextCharIs(input, '0')) {
+        			statement.append(input.next());
+    				if (nextCharIsDigit(input)) {
+    					throw new APException("invalid set");
+    				}
+    			}
+    		} else if (nextCharIs(input, ' ')) {
+				skipToken(input.next(), ' ');
+    		} else if (nextCharIsDigit(input)) {
+    			statement.append(input.next());
+    			while (nextCharIs(input, ' ')) {
+    				skipToken(input.next(), ' ');
+    				if (nextCharIsDigit(input)) {
+    					throw new APException("invalid set");
+    				}
+    			}
+    		} else if (nextCharIs(input, ',')) {
+    			statement.append(input.next());
+    			while (nextCharIs(input, ' ')) {
+    				skipToken(input.next(), ' ');
+    			}
+				if (!nextCharIsDigit(input)) {
+					throw new APException("invalid set");
+				}
+    		} else {
+    			statement.append(input.next());
+    		}
     	}
+    	
+    	return new Scanner(statement.toString());
     }
     
     public void parseAssignment(Scanner input) throws APException {
@@ -61,7 +109,7 @@ public class Main {
     public void printStatement(Scanner input) throws APException {
 		skipToken(input.next(), '?');
         SetInterface<BigInteger> set = parseExpression(input);
-        System.out.println(SetToString(set));
+        out.println(SetToString(set));
     }
 
     private String SetToString(SetInterface<BigInteger> set){
@@ -272,6 +320,10 @@ public class Main {
     			}
 	    	} else if (nextCharIs(factor, '{')) {
 	    		skipToken(factor.next(), '{');
+	    		
+	    		if (nextCharIs(factor, ',')) {
+	    			throw new APException("Number missing");
+	    		}
     			
 	    		while (!nextCharIs(factor, '}') && factor.hasNext()) {
 	    			set.append(factor.next());
@@ -330,9 +382,9 @@ public class Main {
         return input.hasNext("[a-zA-Z]");
     }
     
-    private boolean nextCharIsDigit (Scanner in) {
-        in.useDelimiter("");
-    	return in.hasNext("[0-9]"); 
+    private boolean nextCharIsDigit (Scanner input) {
+    	input.useDelimiter("");
+    	return input.hasNext("[0-9]"); 
 	}
     
     private boolean nextCharIs(Scanner input, char c){
@@ -345,10 +397,10 @@ public class Main {
         Scanner statement;
 
         while(in.hasNextLine()) {
-			statement = new Scanner(in.nextLine().replaceAll(" ", ""));
+			//statement = new Scanner(in.nextLine().replaceAll(" ", ""));
 
 			try {
-				parseStatement(statement);
+				parseStatement(in.nextLine());
 			} catch (APException e) {
 				System.out.println(e);
 			}
