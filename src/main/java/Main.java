@@ -17,339 +17,398 @@ public class Main {
                     +"<Identifier>=<Set/Factor> to assign a Set to an Identifier.\n\n"
                     + "Set Interpreter by Kostas Moumtzakis & Ruben van der Ham";
 
-    Scanner input;
+    
     PrintStream out;
-    HashMap<Identifier, SetInterface<BigInteger>> variables;
-    boolean ignoreDoubleElementsInSet;
-    boolean fixDoubleElementsInSet;
+    HashMap<IdentifierInterface, SetInterface<BigInteger>> setCollection;
 
     Main(){
         out = new PrintStream(System.out);
-        variables = new HashMap<Identifier, SetInterface<BigInteger>>();
+        setCollection = new HashMap<IdentifierInterface, SetInterface<BigInteger>>();
+    }
+    
+    public void parseStatement(String input) throws APException {
+    	Scanner statement = format(input);
+    	
+    	if (nextCharIsLetter(statement)) {
+            parseAssignment(statement);
+    	} else if (nextCharIs(statement, '?')) {
+    		printStatement(statement);
+    	} else if (! nextCharIs(statement, '/')){
+    		throw new APException(INVALID_STATEMENT);
+    	}
+    }
+    
+    private Scanner format(String line) throws APException {
+    	Scanner input = new Scanner(line);
+    	StringBuilder statement = new StringBuilder();
+    	
+    	while (input.hasNext()) {
+    		if (nextCharIs(input, '/')) {
+    			statement.append(input.nextLine());
+        		return new Scanner(statement.toString());
+        	} else if (nextCharIsLetter(input) || nextCharIsDigit(input)) {
+    			statement.append(input.next());
+    			while (nextCharIs(input, ' ')) {
+    				skipToken(input.next(), ' ');
+    				if (nextCharIsLetter(input) || nextCharIsDigit(input)) {
+    					throw new APException("invalid Identifier");
+    				}
+    			}
+    		} else if (nextCharIs(input, '{')) {
+    			statement.append(input.next());
+    			while (nextCharIs(input, ' ')) {
+    				skipToken(input.next(), ' ');
+				}
+    			if (!(nextCharIs(input, '}') || nextCharIsDigit(input))) {
+    				throw new APException("Invalid set");
+    			}
+    			if (nextCharIs(input, '0')) {
+        			statement.append(input.next());
+    				if (nextCharIsDigit(input)) {
+    					throw new APException("invalid set");
+    				}
+    			}
+    		} else if (nextCharIs(input, ' ')) {
+				skipToken(input.next(), ' ');
+    		} else if (nextCharIsDigit(input)) {
+    			statement.append(input.next());
+    			while (nextCharIs(input, ' ')) {
+    				skipToken(input.next(), ' ');
+    				if (nextCharIsDigit(input)) {
+    					throw new APException("invalid set");
+    				}
+    			}
+    		} else if (nextCharIs(input, ',')) {
+    			statement.append(input.next());
+    			while (nextCharIs(input, ' ')) {
+    				skipToken(input.next(), ' ');
+    			}
+				if (!nextCharIsDigit(input)) {
+					throw new APException("invalid set");
+				}
+    		} else {
+    			statement.append(input.next());
+    		}
+    	}
+    	
+    	return new Scanner(statement.toString());
+    }
+    
+    public void parseAssignment(Scanner input) throws APException {
+    	SetInterface<BigInteger> set = new Set<BigInteger>();
+    	input.useDelimiter("\\=");
+    	IdentifierInterface identifier = parseIdentifier(input.next());
+    	try {
+        	set = parseExpression(new Scanner(input.next()));
+    	} catch (Exception e) {
+    		throw new APException(INVALID_STATEMENT);
+    	}
+    	setCollection.put(identifier, set);
+    }
+    
+    public void printStatement(Scanner input) throws APException {
+		skipToken(input.next(), '?');
+        SetInterface<BigInteger> set = parseExpression(input);
+        out.println(SetToString(set));
     }
 
-
-
-    void parseStatement(Scanner input)throws APException {
-        //System.out.println("input was:"+input.nextLine());
-        //input.reset();
-        //skipSpaces(input);
-        if (nextCharIs(input, '/')) {
-            System.out.println("Comment found");
-            System.out.println(input.nextLine());
-            return; //comment, so this is skipped
+    private String SetToString(SetInterface<BigInteger> set){
+		StringBuilder output = new StringBuilder();
+		
+		if(set.goToFirstElement()){
+			output.append(set.get());
+			while(set.goToNextElement()){
+				output.append(" ");
+				output.append(set.get());
+			}
+		}
+		return output.toString();
+	}
+    
+    public IdentifierInterface parseIdentifier(String input) throws APException {
+    	IdentifierInterface result = new Identifier();
+    	
+    	if(result.hasCorrectIdentifierFormat(input)) {
+    		result.appendIdentifier(input);
         } else {
-            if (nextCharIsLetter(input)) {
-                parseAssignment(input);
-            } else {
-                if (nextCharIs(input, '?')) {
-                    parsePrint(input);
-                } else {
-                    throw new APException(INVALID_STATEMENT);
-                }
-            }
+            throw new APException("Identifier has not valid format");
         }
-    }
-
-    SetInterface parseFactor(Scanner input) throws APException{
-        skipSpaces(input);
-        SetInterface result = null;
-        if (nextCharIsLetter(input)){
-            result = getSetByID(input);
-        } else {
-            if (nextCharIs(input,'{')){
-                input.useDelimiter("}");
-                result = parseSet(new Scanner(input.next()));
-                input.skip("}");
-            } else {
-                if (nextCharIsOpenParenthesis(input)) {
-                    result = parseComplexFactor(input);
-                    input.skip("\\)");
-                }else{
-                    throw new APException("Expression/Factor has wrong format");
-                }
-
-            }}
+    	
         return result;
     }
+    
+    public SetInterface<BigInteger> parseExpression(Scanner expression) throws APException {
+    	SetInterface<BigInteger> result = new Set<BigInteger>();
+    	result = null;
+    	StringBuilder term = new StringBuilder();
+    	int openComplexFactors = 0;
 
-
-    void parseAssignment(Scanner input) throws APException {
-        input.useDelimiter(" |="); //delimit on " " OR "="
-        Scanner identifierScanner = new Scanner(input.next());
-        Identifier tempIdentifier = parseIdentifier(identifierScanner);
-        input = skipSpaces(input);
-        if(nextCharIsLetter(input) ||nextCharIs(input,' ')){    //If next char is letter it would mean there is a space in the identifier and only the first part is parsed.
-            System.out.println("NextChar is letter");
-            throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
-        }
-        if(nextCharIs(input,'=')){
-            input.skip("=");
-        }else{
-            throw new APException("'=' missing, Assignment has not the correct format");
-        }
-        System.out.println("Before set in assignment");
-        SetInterface tempSet = parseExpression(input);
-        System.out.println("AFTER set in assignment");
-        System.out.printf("This is the set:%s\n",tempSet.toString());
-        variables.put(tempIdentifier,tempSet);
+    	while (expression.hasNext()) {
+    		
+    		if (nextCharIs(expression, '(')) {
+    			openComplexFactors += 1;
+				term.append(expression.next());
+    		} else if (nextCharIs(expression, ')')) {
+    			openComplexFactors -= 1;
+				term.append(expression.next());
+    		} else if (nextCharIs(expression, '+') && openComplexFactors == 0) {
+	    		skipToken(expression.next(), '+');
+	    		
+	    		if (result == null) {
+	    			result = parseTerm(new Scanner(term.toString()));
+	    		}
+	    		term.setLength(0);
+	    		
+    			while (expression.hasNext()) {
+    				
+    				if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+    					result = result.union(parseTerm(new Scanner(term.toString())));
+    		    		term.setLength(0);
+    					break;
+    				} else if (nextCharIs(expression, '(')) {
+    					openComplexFactors +=1;
+	    				term.append(expression.next());
+    				} else if (nextCharIs(expression, ')')) {
+    					openComplexFactors -=1;
+        				term.append(expression.next());
+    	    		} else {
+    	    			term.append(expression.next());
+    	    		}
+    			}
+    			
+    			if (term != null) {
+    				result = result.union(parseTerm(new Scanner(term.toString())));
+    			}
+        	} else if (nextCharIs(expression, '|') && openComplexFactors == 0) {
+        		boolean b = true;
+        		skipToken(expression.next(), '|');
+	    		
+	    		if (result == null) {
+		    		result = parseTerm(new Scanner(term.toString()));
+	    		}
+	    		term.setLength(0);
+	    		
+	    		while (expression.hasNext()) {
+    				
+	    			if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+    					result = result.symDifference(parseTerm(new Scanner(term.toString())));
+    		    		term.setLength(0);
+    					break;
+    				} else if (nextCharIs(expression, '(')) {
+    					openComplexFactors +=1;
+	    				term.append(expression.next());
+    				} else if (nextCharIs(expression, ')')) {
+    					openComplexFactors -=1;
+        				term.append(expression.next());
+    	    		} else {
+    	    			term.append(expression.next());
+    	    		}
+    			}
+	    		if (result != null) {
+	    			result = result.symDifference(parseTerm(new Scanner(term.toString())));
+	    		}
+        	} else if (nextCharIs(expression, '-') && openComplexFactors == 0) {
+        		skipToken(expression.next(), '-');
+	    		
+	    		if (result == null) {
+		    		result = parseTerm(new Scanner(term.toString()));
+	    		}
+	    		term.setLength(0);
+	    		
+	    		while (expression.hasNext()) {
+    				
+	    			if (openComplexFactors == 0 && (nextCharIs(expression, '+') || nextCharIs(expression, '-') || nextCharIs(expression, '|'))) {
+    					result = result.complement(parseTerm(new Scanner(term.toString())));
+    		    		term.setLength(0);
+    					break;
+    				} else if (nextCharIs(expression, '(')) {
+    					openComplexFactors +=1;
+	    				term.append(expression.next());
+    				} else if (nextCharIs(expression, ')')) {
+    					openComplexFactors -=1;
+        				term.append(expression.next());
+    	    		} else {
+    	    			term.append(expression.next());
+    	    		}
+    			}
+	    		if (result != null) {
+	    			result = result.complement(parseTerm(new Scanner(term.toString())));
+	    		}
+        	} else {
+        		term.append(expression.next());
+        	}
+    	}
+    	
+    	if (result == null) {
+    		result = parseTerm(new Scanner(term.toString()));
+    	}
+    	
+    	return result;
     }
-
-    Identifier parseIdentifier(Scanner input) throws APException{
-        //input.useDelimiter("=");
-        String identifierName = input.next();
-        if (identifierName.equals("")) {
-            throw new APException(IDENTIFIER_BLANK_EXCEPTION);
-        }
-
-        Identifier tempID = new Identifier();
-        if(!tempID.appendValidIdentifier(identifierName)) {
-            System.out.println("appendValid was WRONG");
-            System.out.println(identifierName);
-            throw new APException(IDENTIFIER_FORMAT_EXCEPTION);
-        }
-        return tempID;
+    
+    public SetInterface<BigInteger> parseTerm(Scanner term) throws APException {
+    	SetInterface<BigInteger> result = new Set<BigInteger>();
+    	StringBuilder factor = new StringBuilder();
+    	int openComplexFactors = 0;
+    	
+    	while (term.hasNext()) {
+    		
+    		if (nextCharIs(term, '(')) {
+    			openComplexFactors += 1;
+    			factor.append(term.next());
+    		} else if (nextCharIs(term, ')')) {
+    			openComplexFactors -= 1;
+    			factor.append(term.next());
+    		} else if (nextCharIs(term, '*') && openComplexFactors == 0) {
+	    		skipToken(term.next(), '*');
+        		result = parseFactor(new Scanner(factor.toString())).intersection(parseTerm(new Scanner(term.nextLine())));
+        		return result;
+    		} else {
+    			factor.append(term.next());
+        	}
+    	}
+		result = parseFactor(new Scanner(factor.toString()));
+    	
+    	return result;
     }
-
-    SetInterface parseExpression(Scanner input)throws APException{ //TODO add APEXCEPTION
-        SetInterface result;
-        String expression = input.nextLine();
-        System.out.printf("\nExpression:%S\n",expression);
-        //expression = expression.replace(" ","");
-        String rpnString = shuntingYard(expression);
-        System.out.printf("\nSHUNYARD output:%S\n",rpnString);
-        Scanner rpnScanner = new Scanner(rpnString);
-        System.out.println("ShunYard done");
-        SetStack rpnStack = new SetStack();
-        rpnScanner.useDelimiter("_");
-        SetInterface set1,
-                set2;
-        String token;
-
-        while(rpnScanner.hasNext()){
-            token = rpnScanner.next();
-            if(isOperator(token)){
-                set2 = rpnStack.pop();
-                set1 = rpnStack.pop();
-                System.out.printf("Operator: %s found\n",token);
-                if (token.charAt(0) == '*'){
-                    SetInterface intersect = set1.intersection(set2);
-                    rpnStack.push(intersect);
-                }else {
-                    if (token.charAt(0) == '+') {
-                        SetInterface union = set1.union(set2);
-                        rpnStack.push(union);
-                    } else {
-                        if (token.charAt(0) == '-') {
-                            SetInterface complement = set1.complement(set2);
-                            rpnStack.push(complement);
-                        } else {
-                            if (token.charAt(0) == '|') {
-                                SetInterface symDifference = set1.symDifference(set2);
-                                rpnStack.push(symDifference);
-                            }
-                        }
-                    }
-                }
-            }else {
-                System.out.printf("factor: %s found\n",token);
-                SetInterface newSet = parseFactor(new Scanner(token));
-                //System.out.printf(newSet.toString());
-                rpnStack.push(newSet);
-            }
-            rpnScanner.skip("_");
-        }
-        result = rpnStack.pop();
-        System.out.printf("\n\nRESULT:%s",result.toString());
-        return result;
+    
+    public SetInterface<BigInteger> parseFactor(Scanner factor) throws APException {
+    	SetInterface<BigInteger> result = new Set<BigInteger>();
+    	int openComplexFactors = 0;
+		StringBuilder set = new StringBuilder();
+    	
+    	while(factor.hasNext()) {
+    		
+    		if (nextCharIs(factor, '(')) {
+	    		skipToken(factor.next(), '(');
+    			openComplexFactors += 1;
+    			while (factor.hasNext() && openComplexFactors != 0) {
+    				
+    				if (nextCharIs(factor, '(')) {
+    	    			openComplexFactors += 1;
+    	    			set.append(factor.next());
+    				} else if (nextCharIs(factor, ')')) {
+    	    			openComplexFactors -= 1;
+    	    			
+    	    			if (openComplexFactors == 0) {
+    	    				if (factor.hasNext()) {
+    	    	    			skipToken(factor.next(), ')');
+    	    	    		} else {
+    	    	    			throw new APException("Invalid token detected");
+    	    	    		}
+    	    			} else {
+    	    				set.append(factor.next());
+    	    			}
+    				}else {
+    					set.append(factor.next());
+    				}
+    			}
+				result = parseExpression(new Scanner(set.toString()));
+    		} else if (nextCharIsLetter(factor)) {
+	    		
+    			set.append(factor.next());
+	    		
+	    		while (nextCharIsLetter(factor)) {
+	    			set.append(factor.next());
+	    		}
+	    		IdentifierInterface identifier = parseIdentifier(set.toString());
+	        	
+    			if (setCollection.containsKey(identifier)) {
+    				result = setCollection.get(identifier);
+    			} else {
+    				throw new APException("Identifier does not correspond to a Set");
+    			}
+	    	} else if (nextCharIs(factor, '{')) {
+	    		skipToken(factor.next(), '{');
+	    		
+	    		if (nextCharIs(factor, ',')) {
+	    			throw new APException("Number missing");
+	    		}
+    			
+	    		while (!nextCharIs(factor, '}') && factor.hasNext()) {
+	    			set.append(factor.next());
+	    		}
+	    		
+	    		if (factor.hasNext()) {
+	    			skipToken(factor.next(), '}');
+	    		} else {
+	    			throw new APException("Invalid token detected");
+	    		}
+	    		
+	    		if (factor.hasNext()) {
+	    			throw new APException("Operator missing / No end of line");
+	    		}
+	    		result = parseSet(set.toString());
+	    	} else {
+	    		throw new APException("What now...");
+	    	}
+    	}
+    	if (openComplexFactors != 0) {
+    		throw new APException("Missing parenthesis detected");
+    	}
+    	
+    	return result;
     }
-
-
-        String shuntingYard(String inFix) throws APException{
-            OperatorStack operatorStack = new OperatorStack();
-            StringBuffer result = new StringBuffer();
-            Scanner ShunScanner = new Scanner(inFix);
-            System.out.printf("\n\nSHUNYARD STARTED\n\n");
-            while(ShunScanner.hasNext()){
-                //System.out.printf("\n\nnew token present\n\n");
-                if(nextCharIsLetter(ShunScanner)|| nextCharIs(ShunScanner,'{')){
-                    ShunScanner.useDelimiter("\\+|\\-|\\||\\*");
-                    String token = ShunScanner.next();
-                    System.out.printf("factor: %s found\n",token);
-                    result.append(token);
-                    result.append('_');
-                }else{
-                    if(nextCharIsOperand(ShunScanner)){
-                        ShunScanner.useDelimiter("[A-Za-z0-9]|\\{");
-                        String token = ShunScanner.next();
-                        System.out.printf("operand: %s found\n",token);
-                        Operator operator = new Operator(token);
-                        while (operatorStack.size() > 0 && operator.getPrecedence() <= operatorStack.peek().getPrecedence()) {
-                            result.append(operatorStack.pop().getValue());
-                            result.append('_');
-                        }
-                        operatorStack.push(operator);
-                    } else{
-                        if(nextCharIs(ShunScanner,'(')){
-                            ShunScanner.useDelimiter("[A-Za-z0-9]");
-                            Operator operator = new Operator(ShunScanner.next());
-                            operatorStack.push(operator);
-                        }else{
-                            if (nextCharIs(ShunScanner,')')){
-                                while(operatorStack.peek().getValue() != '('){
-                                    result.append(operatorStack.pop().getValue());
-                                    result.append('_');
-                                }
-                                if(operatorStack.peek().getValue()== '('){
-                                    operatorStack.pop();
-                                }else{
-                                    throw new APException("ShuntingYard couldn't proccess your expression '(' missing");
-                                }
-                            }
-                        }
-
-                    }
-                }
-            }
-            while(operatorStack.size() != 0){
-                result.append(operatorStack.pop().getValue());
-                result.append('_');
-            }
-
-            //output string: RPN notation delimited with ',' e.g "var1_{5,6,7,8,9}_+_var3_-"
-            return result.toString();
-        }
-    void parsePrint(Scanner input) throws APException{
-        input.skip("\\?");//skip ?,\\to escape.
-        SetInterface toPrint = parseExpression(input);
-        System.out.printf("this set has been returned:%s\n",toPrint);
-        //out.println(toPrint.toString());
-        System.out.println("PRINT OUTPUT:"+toPrint.toString());
+    
+    public SetInterface<BigInteger> parseSet(String numbers) throws APException {
+    	SetInterface<BigInteger> result = new Set<BigInteger>();
+    	Scanner parser = new Scanner(numbers);
+    	parser.useDelimiter(",");
+    	
+    	while (parser.hasNext()) {
+    		try {
+    			result.insert(parser.nextBigInteger());
+    		} catch (Exception e) {
+    			throw new APException("Invalid number");
+    		}
+    	}
+    	parser.close();
+    	
+    	if (result.hasDoubleOccurencies()) {
+    		result.fixDoubleOccurencies();
+    	}
+    	return result;
     }
-
-
-    SetInterface parseSet(Scanner input) throws APException{
-        input.skip("\\{");
-        Set result = new Set();
-        BigInteger newElement;
-        input.useDelimiter(",");
-        while(input.hasNext()){
-            if(nextCharIs(input,',')) {
-                input.skip(",");
-            }
-            try {
-                newElement = new BigInteger(input.next());
-                //newElement = input.nextBigInteger();
-                out.printf("next element:%s",newElement.toString());
-            }catch(Exception e){
-                throw new APException("Couldn't parse inputted Set, end sets with a '}'");
-            }
-            result.insert(newElement);
-        }
-        checkForDoubles(result);
-        return result;
+    
+    private void skipToken (String input, char c) throws APException {
+    	Scanner token = new Scanner(input);
+    	if (! nextCharIs(token, c)) {
+    		throw new APException("Missing token: " + c);
+	    }
     }
-
-    SetInterface parseComplexFactor(Scanner input) throws APException{
-        input.skip("\\(");
-        return parseExpression(input);
-    }
-
-    SetInterface getSetByID(Scanner input) throws APException{
-        //input.useDelimiter("[^A-Za-z0-9]");
-        SetInterface result;
-        Scanner identifierScanner = new Scanner(input.next());
-        Identifier parsedIdentifier = parseIdentifier(identifierScanner);
-        if(variables.containsKey(parsedIdentifier)) {
-            result = variables.get(parsedIdentifier);
-        }else{
-            throw new APException(parsedIdentifier.toString()+IDENTIFIER_NOT_FOUND);
-        }
-        return result;
-    }
-
-    Scanner skipSpaces(Scanner input){
-        while(nextCharIs(input,' ')){
-            input.skip(" ");
-        }
-        return input;
-    }
-
-    void checkForDoubles(SetInterface result)throws APException{
-        if(result.hasDoubleOccurencies() && !ignoreDoubleElementsInSet && !fixDoubleElementsInSet){
-            throw new APException(DOUBLE_VALUE_SET);
-        }else{
-            if(fixDoubleElementsInSet){
-                result.fixDoubleOccurencies();
-            }
-        }
-    }
+    
     private boolean nextCharIsLetter(Scanner input){
         input.useDelimiter("");
         return input.hasNext("[a-zA-Z]");
     }
-    private boolean nextCharIsOperand(Scanner input) {
-        input.useDelimiter("");
-        return input.hasNext("\\*") ||input.hasNext("\\+")||input.hasNext("\\-")||input.hasNext("\\|");
-    }
-    private boolean nextCharIsOpenParenthesis(Scanner input) {
-        input.useDelimiter("");
-        return input.hasNext("[(]");
-    }
-
+    
+    private boolean nextCharIsDigit (Scanner input) {
+    	input.useDelimiter("");
+    	return input.hasNext("[0-9]"); 
+	}
+    
     private boolean nextCharIs(Scanner input, char c){
         input.useDelimiter("");
         return input.hasNext(Pattern.quote(c+""));
     }
-    private boolean isOperator(String input){
-        return input.equals("+")||input.equals("-")||input.equals("*")||input.equals("|");
-    }
+    
+    private void start() {
+        Scanner in = new Scanner(System.in);
+        Scanner statement;
 
-    private void start(boolean ignore,boolean fix) {
-        this.ignoreDoubleElementsInSet = ignore;
-        this.fixDoubleElementsInSet = fix;
+        while(in.hasNextLine()) {
+			//statement = new Scanner(in.nextLine().replaceAll(" ", ""));
 
-        Scanner directInput = new Scanner(System.in);
-        while (directInput.hasNextLine()) {
-            try {
-                if(false) {
-                    String statement = input.nextLine();
-                    statement = statement.replace(" ", "");
-                    Scanner spaceLess = new Scanner(statement);
-                    parseStatement(spaceLess);
-                }else {
-                    input = new Scanner(directInput.nextLine().replace(" ",""));
-                    System.out.println("NEWLINEEEEEEE!!!");
-                    parseStatement(input);
-
-                }
-            }catch(APException exception){
-                out.println(exception);
-            }
-        }
+			try {
+				parseStatement(in.nextLine());
+			} catch (APException e) {
+				System.out.println(e);
+			}
+		}
+        in.close();
     }
 
     public static void main(String[] argv) {
-        try{
-            if (argv[0].equals("--help")){
-                System.out.println(HELP_MESSAGE);
-                System.exit(0);
-            }else {
-                if (argv[0].equals("--ignore-doubles")) {
-                    System.out.println("EXPERIMENTAL: 2 Elements in the same set with the same value, will be allowed");
-                    new Main().start(true, false);
-                } else {
-                    if (argv[0].equals("--fix-doubles")) {
-                        System.out.println("EXPERIMENTAL: 2 Elements in the same set with the same value, will be 1 unique element");
-                        new Main().start(false, true);
-                    } else {
-                        new Main().start(false, false);
-                    }
-                }
-            }
-        }catch (Exception e){
-            new Main().start(false,false);
-        };
-
+            new Main().start();
     }
 }

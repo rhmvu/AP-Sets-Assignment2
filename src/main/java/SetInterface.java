@@ -14,27 +14,27 @@ public interface SetInterface<E extends Comparable> {
     /**	@precondition -
      *  @postcondition - The current Set has been initialized and returned as a SetInterface.
      **/
-    SetInterface init();
+    SetInterface<E> init();
 
     /**	@precondition -
      *  @postcondition - The Union of the current Set and the parameterized Set has been returned as a SetInterface.
      **/
-    SetInterface union(SetInterface toUnion);
+    SetInterface<E> union(SetInterface<E> toUnion);
 
     /**	@precondition -
      *  @postcondition - The Intersection of the current Set and the parameterized Set has been returned as a SetInterface.
      **/
-    SetInterface intersection(SetInterface toIntersect);
+    SetInterface<E> intersection(SetInterface<E> toIntersect);
 
     /**	@precondition -
      *  @postcondition - The Complement of the current Set and the parameterized Set has been returned as a SetInterface.
      **/
-    SetInterface complement(SetInterface toComplement);
+    SetInterface<E> complement(SetInterface<E> toComplement);
 
     /**	@precondition -
      *  @postcondition - The Symantic Difference of the current Set and the parameterized Set has been returned as a SetInterface.
      **/
-    SetInterface symDifference(SetInterface toSymDiffer);
+    SetInterface<E> symDifference(SetInterface<E> toSymDiffer);
 
     /**	@precondition -
      *  @postcondition - FALSE: Set is not empty.
@@ -57,19 +57,19 @@ public interface SetInterface<E extends Comparable> {
      *	@postcondition - Element d has been added to the Set
      *                   Set-POST has been returned.
      **/
-    SetInterface insert(E d);
+    SetInterface<E> insert(E d);
 
     /**	@precondition  - Set must not be empty.
      *	@postcondition - Element d has been removed from the Set
      *                   Set-POST has been returned.
      **/
-    SetInterface remove(E d);
+    SetInterface<E> remove(E d);
 
     /**
      * @precondition -
      * @postcondition A deep copy of the Set has been returned.
      */
-    SetInterface copy();
+    SetInterface<E> copy();
 
     /**	@precondition -
      *  @postcondition - FALSE: current Set does NOT contain 2 elements with the same value;
@@ -80,11 +80,31 @@ public interface SetInterface<E extends Comparable> {
     /**	@precondition -
      *  @postcondition - set-POST contains unique elements.
      **/
-    SetInterface fixDoubleOccurencies();
+    SetInterface<E> fixDoubleOccurencies();
     /**	@precondition  -
-     *	@postcondition - The Set is returned in Stringform.
+     *	@postcondition - The whole Set is returned as a String.
      **/
     String toString();
 
+    /**	@precondition  -
+     *	@postcondition - The Set's current item is returned as a String.
+     **/
+    String get();
+
+    /**	@precondition  -
+     *	@postcondition - The Set's current pointer is set to the first element.
+     **/
+    boolean goToFirstElement();
+
+
+    /**	@precondition  -
+     *	@postcondition - The Set's current pointer is set to the last element.
+     **/
+    boolean goToLastElement();
+
+    /**	@precondition  -
+     *	@postcondition - The Set's current pointer is set to the next element.
+     **/
+    boolean goToNextElement();
 
 }

@@ -33,5 +33,7 @@ public interface IdentifierInterface {
      *                     @success:	The String in the input has been added to the Identifier.
      *                     @failure:    The String in the input was not conform the ENBF Identifier format, input not added.
      **/
-    public boolean appendValidIdentifier(String toAppend);
+    public void appendIdentifier(String toAppend);
+    
+    public boolean hasCorrectIdentifierFormat(String input);
 }
