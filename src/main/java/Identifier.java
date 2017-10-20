@@ -27,35 +27,17 @@ public class Identifier implements IdentifierInterface {
     }
 
     @Override
-    public boolean appendValidIdentifier(String toAppend){
-        if (hasCorrectIdentifierFormat(toAppend)){
-            append(toAppend);
-            return true;
-        }
-        return false;
+    public void appendIdentifier(String toAppend){
+            identifier.append(toAppend);
     }
 
-    private void append(String toAppend){
-        identifier.append(toAppend);
-    }
-
-    private boolean isLetter(char input){
-        return Character.isLetter(input);
-    }
-
-    private boolean isDigit(char input){
-        return Character.isDigit(input);
-    }
-
-    private boolean hasCorrectIdentifierFormat(String input){
-        if(!isLetter(input.charAt(0))){
-            return  false;
-        }
-        for (int i = 1; i < input.length();i++){
-            char currentChar = input.charAt(i);
-            if(!(isLetter(currentChar) || isDigit(currentChar))){
-                return false;
-            }
+    @Override
+    public boolean hasCorrectIdentifierFormat(String input){
+    	
+        for (int i = 0; i < input.length(); i++){
+        	if (!Character.isLetter(input.charAt(i)) && !Character.isDigit(input.charAt(i))) {
+        		return false;
+        	}
         }
         return true;
     }
