@@ -54,7 +54,7 @@ public class List<E extends Comparable> implements ListInterface<E>{
         if (isEmpty()){
             current = tail = head = new Node(d);
         } else {
-        	
+
             if (tail.data.compareTo(d)<=0) {
                 Node tailNode = new Node(d, tail, null);
                 current = tail = tail.next = tailNode;
@@ -67,7 +67,7 @@ public class List<E extends Comparable> implements ListInterface<E>{
                 current = middleNode.next.prior = middleNode.prior.next =middleNode;
             }
         }
-        
+
         numberOfElements+=1;
         return this;
     }
@@ -108,18 +108,18 @@ public class List<E extends Comparable> implements ListInterface<E>{
             return false;
         }
         goToFirst();
-        
+
         if (current.data.hashCode() == d.hashCode() || current.data == d) {
             return true;
         }
-        
+
         while (goToNext()) {
-        	if (current.data.hashCode() == d.hashCode() || current.data == d) {
+            if (current.data.hashCode() == d.hashCode() || current.data == d) {
                 return true;
             }
         }
         current = head;
-        
+
         if (!(head.data.compareTo(d) > 0)){
             while (current.data.compareTo(d)< 0) {
                 if (current.next == null){
@@ -176,14 +176,14 @@ public class List<E extends Comparable> implements ListInterface<E>{
     public ListInterface<E> copy() {
         Node oldCurrent = current;
         List<E> temp = new List<>();
-        
+
         if (this.isEmpty()){
             return temp.init();
         }
         this.goToLast();
         temp.insert(this.retrieve());
         temp.tail = temp.current;
-        
+
         while (current.prior != null){
             this.current = current.prior;
             temp.insert(this.retrieve());

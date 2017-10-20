@@ -9,7 +9,6 @@
  **/
 public interface SetInterface<E extends Comparable> {
 
-
     /**	@precondition -
      *  @postcondition - The current Set has been initialized and returned as a SetInterface.
      **/
@@ -95,7 +94,6 @@ public interface SetInterface<E extends Comparable> {
      **/
     boolean goToFirstElement();
 
-
     /**	@precondition  -
      *	@postcondition - The Set's current pointer is set to the last element.
      **/
@@ -105,5 +103,4 @@ public interface SetInterface<E extends Comparable> {
      *	@postcondition - The Set's current pointer is set to the next element.
      **/
     boolean goToNextElement();
-
 }

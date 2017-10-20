@@ -21,15 +21,15 @@ public class Set<E extends Comparable> implements SetInterface<E>{
             return result;
         }
         this.set.goToFirst();
-        
+
         if (!result.contains(this.set.retrieve())){
             result.insert(this.set.retrieve());
         }
-        
+
         while (this.set.goToNext()) {
-	        if (!result.contains(this.set.retrieve())){
-	            result.insert(this.set.retrieve());
-	        }
+            if (!result.contains(this.set.retrieve())){
+                result.insert(this.set.retrieve());
+            }
         }
         return result;
     }
@@ -38,16 +38,16 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     public SetInterface<E> intersection(SetInterface<E> toIntersect){
         SetInterface<E> result = new Set<E>();
         if (this.isEmpty() || set.isEmpty()) {
-        	return result;
+            return result;
         }
         this.set.goToFirst();
-        
+
         if (toIntersect.contains(this.set.retrieve())){
             result.insert(this.set.retrieve());
         }
-        
+
         while (this.set.goToNext()) {
-        	if (toIntersect.contains(this.set.retrieve())){
+            if (toIntersect.contains(this.set.retrieve())){
                 result.insert(this.set.retrieve());
             }
         }
@@ -56,18 +56,18 @@ public class Set<E extends Comparable> implements SetInterface<E>{
     @Override
     public SetInterface<E> complement(SetInterface<E> toComplement){
         SetInterface<E> result = this.copy();
-        
+
         if (this.isEmpty() || set.isEmpty()) {
-        	return result;
+            return result;
         }
         this.set.goToFirst();
-        
+
         if (toComplement.contains(this.set.retrieve())){
             result.remove(this.set.retrieve());
         }
-        
+
         while (this.set.goToNext()) {
-        	if(toComplement.contains(this.set.retrieve())){
+            if(toComplement.contains(this.set.retrieve())){
                 result.remove(this.set.retrieve());
             }
         }
@@ -124,17 +124,17 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         }
         E value = set.retrieve();
         set.remove();
-        
+
         if (set.find(value)){
             set.insert(value);
             return true;
         }
         set.insert(value);
-            
+
         while (this.set.goToNext()) {
-        	value = set.retrieve();
+            value = set.retrieve();
             set.remove();
-            
+
             if (set.find(value)){
                 set.insert(value);
                 return true;
@@ -157,7 +157,7 @@ public class Set<E extends Comparable> implements SetInterface<E>{
         }
 
         while (this.set.goToNext()) {
-        	value = set.retrieve();
+            value = set.retrieve();
             remove((E) value);
 
             if (!set.find(value)){

@@ -27,7 +27,6 @@ public interface IdentifierInterface {
      **/
     boolean equals(Object toCompare);
 
-
     /**	@precondition  - The String in the input does not disrupt the EBNF Identifier format.
      *	@postcondition - The String in the input has been added to the Identifier.
      **/

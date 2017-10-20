@@ -28,16 +28,16 @@ public class Identifier implements IdentifierInterface {
 
     @Override
     public void appendIdentifier(String toAppend){
-            identifier.append(toAppend);
+        identifier.append(toAppend);
     }
 
     @Override
     public boolean hasCorrectIdentifierFormat(String input){
-    	
+
         for (int i = 0; i < input.length(); i++){
-        	if (!Character.isLetter(input.charAt(i)) && !Character.isDigit(input.charAt(i))) {
-        		return false;
-        	}
+            if (!Character.isLetter(input.charAt(i)) && !Character.isDigit(input.charAt(i))) {
+                return false;
+            }
         }
         return true;
     }
